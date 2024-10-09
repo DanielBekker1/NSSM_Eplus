@@ -1,0 +1,638 @@
+Program Version,EnergyPlus, Version 24.1.0-9d7789a3ac, YMD=2024.10.06 21:15
+! <Version>, Version ID
+ Version, 24.1
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  4, 15
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, No, Yes, No
+! <Performance Precision Tradeoffs>, Use Coil Direct Simulation, Zone Radiant Exchange Algorithm, Override Mode, Number of Timestep In Hour, Force Euler Method, Minimum Number of Warmup Days, Force Suppress All Begin Environment Resets, Minimum System Timestep, MaxZoneTempDiff, MaxAllowedDelTemp
+ Performance Precision Tradeoffs, No, ScriptF, Normal, 4, No, 1, No, 1.0, 0.300, 2.0000E-003
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 0.200, 0.200, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00,  18.00
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,   4.59,   1.79,   1.02,   1.68,   5.47,   9.72,  13.71,  16.60,  17.45,  16.09,  12.82,   8.69
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Aarhus.AP MJ DNK SRC-TMYx WMO#=060700,56.31,10.63,1.00,25.00,101025,1.2007
+! <Site Water Mains Temperature Information>,Calculation Method{},Water Mains Temperature Schedule Name{},Annual Average Outdoor Air Temperature{C},Maximum Difference In Monthly Average Outdoor Air Temperatures{deltaC},Fixed Default Water Mains Temperature{C}
+Site Water Mains Temperature Information,FixedDefault,NA,NA,NA,10.0
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,ReMoni Building,358.000,Suburbs,4.00000E-002,0.40000,FullExterior,25,1
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,DOE-2
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Algorithm {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}, Space Heat Balance Sizing, Space Heat Balance Simulation
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference, No, No
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, Yes,YES
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing and Return {AdjustMixingOnly | AdjustReturnOnly | AdjustMixingThenReturn | AdjustReturnThenMixing | None}, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.220,370.000,6.500000E-003
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,0,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,43,368,71
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, THERMAL ZONE: ALPHA_MEETING_ROOM,0.0,5.14,17.92,-2.71E-016,1.59,15.53,1.30,1,1,1,-1.70,4.68,13.01,18.09,-2.71E-016,2.60,2.60,72.13,TARP,DOE-2,27.74,53.21,38.92,14.29,7,2,0,Yes
+ Zone Information, THERMAL ZONE: BETA_MEETING_ROOM,0.0,9.51,19.80,-2.71E-016,10.63,22.03,1.30,1,1,1,8.69,12.57,20.12,23.94,-2.71E-016,2.60,2.60,36.07,TARP,DOE-2,13.87,38.74,36.64,2.10,6,2,0,Yes
+ Zone Information, THERMAL ZONE: CLEANING_ROOM,0.0,24.93,23.37,-2.71E-016,26.00,25.26,1.30,1,1,1,24.03,27.97,24.23,26.30,-2.71E-016,2.60,2.60,19.55,TARP,DOE-2,7.52,30.24,29.52,0.72,6,1,0,Yes
+ Zone Information, THERMAL ZONE: CORRIDOR_TOILET,0.0,19.45,23.50,-2.71E-016,20.09,23.29,1.30,1,1,1,18.62,21.56,22.31,24.26,-2.71E-016,2.60,2.60,13.83,TARP,DOE-2,5.32,24.57,24.57,0.00,7,0,0,Yes
+ Zone Information, THERMAL ZONE: ENTREANCE_SHOW_ROOM,0.0,5.64,17.92,-2.71E-016,8.19,22.27,1.30,1,1,1,4.51,14.63,13.18,29.69,-2.71E-016,2.60,2.60,217.45,TARP,DOE-2,83.63,137.67,120.97,13.70,19,5,0,Yes
+ Zone Information, THERMAL ZONE: ENTREANCE_TOILET,0.0,9.51,25.31,-2.71E-016,7.59,26.65,1.30,1,1,1,6.56,8.63,25.56,27.74,-2.71E-016,2.60,2.60,10.94,TARP,DOE-2,4.21,21.35,21.35,0.00,7,0,0,Yes
+ Zone Information, THERMAL ZONE: EXTRA_CLEANING_ROOM,0.0,9.51,29.17,-2.71E-016,7.75,28.58,1.30,1,1,1,6.94,8.55,27.68,29.49,-2.71E-016,2.60,2.60,7.05,TARP,DOE-2,2.71,17.16,17.16,0.00,6,0,0,Yes
+ Zone Information, THERMAL ZONE: EXTRA_OFFICE_1,0.0,13.26,23.50,-2.71E-016,15.59,22.20,1.30,1,1,1,12.44,18.75,20.25,24.16,-3.61E-016,2.60,2.60,59.55,TARP,DOE-2,22.90,51.43,46.71,2.72,8,4,0,Yes
+ Zone Information, THERMAL ZONE: EXTRA_OFFICE_2,0.0,4.01,36.67,-2.71E-016,0.93,32.97,1.30,1,1,1,-1.14,2.99,29.16,36.79,-2.71E-016,2.60,2.60,75.56,TARP,DOE-2,29.06,59.15,55.00,4.15,6,4,0,Yes
+ Zone Information, THERMAL ZONE: EXTRA_STORAGE,0.0,4.01,29.17,-2.71E-016,1.12,27.35,1.30,1,1,1,-0.88,3.12,25.41,29.29,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.08,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_CORRIDOR,0.0,5.64,25.31,-2.71E-016,3.86,31.23,1.30,1,1,1,2.60,4.92,23.50,40.59,-2.71E-016,2.60,2.60,72.54,TARP,DOE-2,27.90,97.63,97.63,0.00,16,0,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_MEETING_ROOM_1,0.0,5.64,36.67,-2.71E-016,6.23,38.79,1.30,1,1,1,4.23,8.23,36.85,40.73,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.08,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_MEETING_ROOM_2,0.0,5.64,32.92,-2.71E-016,6.36,35.04,1.30,1,1,1,4.36,8.36,33.10,36.98,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.08,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_MEETING_ROOM_3,0.0,5.64,29.17,-2.71E-016,6.49,31.29,1.30,1,1,1,4.49,8.49,29.35,33.23,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.08,7,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_OFFICE_1,0.0,5.64,47.80,-2.71E-016,1.35,44.18,1.30,1,1,1,-1.53,4.23,40.40,47.96,-2.71E-016,2.60,2.60,105.46,TARP,DOE-2,40.56,66.95,62.80,4.15,8,4,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_OFFICE_2,0.0,9.51,44.17,-2.71E-016,5.97,46.22,1.30,1,1,1,3.97,7.97,44.34,48.10,-2.71E-016,2.60,2.60,36.52,TARP,DOE-2,14.05,39.00,36.93,2.07,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_OFFICE_3,0.0,9.51,44.17,-2.71E-016,6.10,42.53,1.30,1,1,1,4.09,8.10,40.59,44.48,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.08,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_OFFICE_4,0.0,4.01,40.42,-2.71E-016,0.73,38.60,1.30,1,1,1,-1.27,2.73,36.65,40.54,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.58,2.07,6,2,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_TOILET_1,0.0,5.64,29.17,-2.71E-016,5.81,28.52,1.30,1,1,1,4.62,7.00,27.60,29.43,-2.71E-016,2.60,2.60,10.58,TARP,DOE-2,4.07,21.19,21.19,0.00,7,0,0,Yes
+ Zone Information, THERMAL ZONE: FINANCE_TOILET_2,0.0,5.64,27.42,-2.71E-016,5.66,26.58,1.30,1,1,1,4.68,6.63,25.49,27.67,-2.71E-016,2.60,2.60,10.31,TARP,DOE-2,3.97,20.75,20.75,0.00,7,0,0,Yes
+ Zone Information, THERMAL ZONE: GAMMA_MEETING_ROOM,0.0,15.45,29.17,-2.71E-016,16.49,27.83,1.30,1,1,1,14.43,18.56,25.84,29.83,-2.71E-016,2.60,2.60,40.14,TARP,DOE-2,15.44,40.87,38.80,2.08,6,2,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_CORRIDOR,0.0,19.45,23.50,-2.71E-016,21.11,21.29,1.30,1,1,1,14.56,24.48,13.23,26.17,-2.71E-016,2.60,2.60,100.40,TARP,DOE-2,38.62,116.30,116.30,0.00,16,0,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_MEETING_ROOM,0.0,24.93,12.42,-2.71E-016,26.35,15.16,1.30,1,1,1,24.35,28.35,13.28,17.04,-2.71E-016,2.60,2.60,36.52,TARP,DOE-2,14.05,39.00,35.35,3.65,6,3,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_OFFICE_1,0.0,24.93,16.05,-2.71E-016,26.16,20.63,1.30,1,1,1,24.10,28.23,16.91,24.36,-2.71E-016,2.60,2.60,73.80,TARP,DOE-2,28.38,58.24,54.16,4.08,6,4,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_OFFICE_2,0.0,23.33,16.05,-2.71E-016,20.88,14.97,1.30,1,1,1,18.88,22.88,13.09,16.85,-2.71E-016,2.60,2.60,36.52,TARP,DOE-2,14.05,39.00,34.95,4.05,6,4,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_OFFICE_3,0.0,23.33,19.80,-2.71E-016,20.75,18.66,1.30,1,1,1,18.75,22.76,16.72,20.60,-2.71E-016,2.60,2.60,37.78,TARP,DOE-2,14.53,39.65,37.23,2.43,8,3,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_TOILET_1,0.0,22.33,21.65,-2.71E-016,20.84,21.46,1.30,1,1,1,20.06,21.63,20.51,22.41,-2.71E-016,2.60,2.60,7.22,TARP,DOE-2,2.78,17.42,17.42,0.00,6,0,0,Yes
+ Zone Information, THERMAL ZONE: HARDWARE_TOILET_2,0.0,20.83,21.65,-2.71E-016,19.41,21.41,1.30,1,1,1,18.69,20.13,20.46,22.36,-2.71E-016,2.60,2.60,6.61,TARP,DOE-2,2.54,16.77,16.77,0.00,6,0,0,Yes
+ Zone Information, THERMAL ZONE: LARGE_STORAGE_ROOM,0.0,28.80,25.31,-2.71E-016,23.14,28.82,1.30,1,1,1,18.37,27.90,25.97,31.67,-2.71E-016,2.60,2.60,130.67,TARP,DOE-2,50.26,76.57,67.13,6.44,8,6,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_1,0.0,10.51,30.17,2.60,13.55,27.02,3.10,1,1,1,3.98,23.26,24.63,30.80,2.60,4.15,0.78,68.49,TARP,DOE-2,77.59,42.38,42.38,0.00,5,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_10,0.0,4.83,44.12,2.60,1.38,24.07,3.02,1,1,1,-2.55,4.69,-0.80,48.73,2.60,4.15,0.78,190.87,TARP,DOE-2,255.12,73.75,73.75,0.00,6,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_11,0.0,4.83,44.12,2.60,3.19,47.10,2.91,1,1,1,-2.55,8.81,44.26,49.12,2.60,4.15,0.78,13.70,TARP,DOE-2,26.51,11.40,11.40,0.00,4,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_12,0.0,10.51,48.79,2.60,6.00,36.74,3.05,1,1,1,3.29,9.46,24.63,49.12,2.60,4.15,0.78,85.01,TARP,DOE-2,108.71,42.39,42.39,0.00,5,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_2,0.0,18.45,30.17,2.60,21.03,28.42,3.09,1,1,1,17.34,23.26,25.30,32.30,2.60,4.15,0.78,9.65,TARP,DOE-2,11.47,15.86,15.86,0.00,5,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_3,0.0,24.13,27.01,2.60,23.07,30.68,2.91,1,1,1,17.34,28.68,27.84,32.70,2.60,4.15,0.78,13.68,TARP,DOE-2,26.47,11.39,11.39,0.00,4,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_4,0.0,24.13,16.09,2.60,26.16,22.48,3.00,1,1,1,23.17,29.39,12.45,32.70,2.60,4.15,0.78,61.73,TARP,DOE-2,88.47,28.32,28.32,0.00,6,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_5,0.0,18.45,11.42,2.60,23.65,14.08,2.91,1,1,1,18.04,29.39,12.06,16.92,2.60,4.15,0.78,13.68,TARP,DOE-2,26.47,11.39,11.39,0.00,4,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_6,0.0,24.13,24.47,2.60,21.11,18.88,3.06,1,1,1,17.79,23.55,12.06,25.30,2.60,4.15,0.77,35.39,TARP,DOE-2,44.70,24.92,24.92,0.00,5,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_7,0.0,4.83,24.47,2.60,13.69,22.92,3.10,1,1,1,3.98,23.26,19.14,25.30,2.60,4.15,0.78,68.37,TARP,DOE-2,77.46,42.37,42.37,0.00,5,0,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_8,0.0,4.83,3.89,2.60,6.86,12.22,3.05,1,1,1,3.98,10.54,-0.41,24.63,2.60,4.15,0.78,89.14,TARP,DOE-2,114.05,43.83,43.83,11.18,5,1,0,Yes
+ Zone Information, THERMAL ZONE: ROOF_9,0.0,10.51,-0.77,2.60,4.79,1.22,2.91,1,1,1,-0.82,10.54,-0.80,4.06,2.60,4.15,0.78,13.70,TARP,DOE-2,26.51,11.40,11.40,0.00,4,0,0,Yes
+ Zone Information, THERMAL ZONE: SOFTWARE_OFFICE_1,0.0,7.76,10.11,-2.71E-016,5.05,7.69,1.30,1,1,1,-0.31,9.16,0.24,13.34,-2.71E-016,2.60,2.60,266.46,TARP,DOE-2,102.48,84.96,71.51,13.44,9,8,0,Yes
+ Zone Information, THERMAL ZONE: SOFTWARE_OFFICE_2,0.0,5.64,17.92,-2.71E-016,2.26,22.00,1.30,1,1,1,-0.75,5.01,17.92,25.55,-2.71E-016,2.60,2.60,98.59,TARP,DOE-2,37.92,67.60,63.45,4.15,9,4,0,Yes
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, THERMAL ZONE: ALPHA_MEETING_ROOM,27.74,1.0,27.742,3.605E-002,8.000,1.442,0.000,0.000,0.000,0.000,9.442,No
+ Zone Internal Gains Nominal, THERMAL ZONE: BETA_MEETING_ROOM,13.87,1.0,13.875,7.207E-002,8.000,2.883,0.000,0.000,0.000,0.000,10.883,No
+ Zone Internal Gains Nominal, THERMAL ZONE: CLEANING_ROOM,7.52,1.0,7.518,0.133,8.000,5.321,0.000,0.000,0.000,0.000,13.321,No
+ Zone Internal Gains Nominal, THERMAL ZONE: CORRIDOR_TOILET,5.32,1.0,5.319,0.188,8.000,7.521,0.000,0.000,0.000,0.000,15.521,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ENTREANCE_SHOW_ROOM,83.63,1.0,83.633,1.196E-002,8.000,0.478,0.000,0.000,0.000,0.000,8.478,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ENTREANCE_TOILET,4.21,1.0,4.209,0.238,8.000,9.502,0.000,0.000,0.000,0.000,17.502,No
+ Zone Internal Gains Nominal, THERMAL ZONE: EXTRA_CLEANING_ROOM,2.71,1.0,2.713,0.369,8.000,14.747,0.000,0.000,0.000,0.000,22.747,No
+ Zone Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_1,22.90,1.0,22.903,4.366E-002,8.000,1.746,0.000,0.000,0.000,0.000,9.746,No
+ Zone Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_2,29.06,1.0,29.063,3.441E-002,8.000,1.376,0.000,0.000,0.000,0.000,9.376,No
+ Zone Internal Gains Nominal, THERMAL ZONE: EXTRA_STORAGE,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_CORRIDOR,27.90,1.0,27.900,3.584E-002,8.000,1.434,0.000,0.000,0.000,0.000,9.434,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_1,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_2,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_3,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_1,40.56,10.0,4.056,0.247,8.000,0.986,0.000,0.000,0.000,0.000,8.986,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_2,14.05,1.0,14.047,7.119E-002,8.000,2.848,0.000,0.000,0.000,0.000,10.848,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_3,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_4,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_1,4.07,1.0,4.069,0.246,8.000,9.831,0.000,0.000,0.000,0.000,17.831,No
+ Zone Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_2,3.97,1.0,3.967,0.252,8.000,10.084,0.000,0.000,0.000,0.000,18.084,No
+ Zone Internal Gains Nominal, THERMAL ZONE: GAMMA_MEETING_ROOM,15.44,1.0,15.440,6.477E-002,8.000,2.591,0.000,0.000,0.000,0.000,10.591,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_CORRIDOR,38.62,1.0,38.617,2.590E-002,8.000,1.036,0.000,0.000,0.000,0.000,9.036,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_MEETING_ROOM,14.05,1.0,14.047,7.119E-002,8.000,2.848,0.000,0.000,0.000,0.000,10.848,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_1,28.38,10.0,2.838,0.352,8.000,1.409,0.000,0.000,0.000,0.000,9.409,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_2,14.05,1.0,14.047,7.119E-002,8.000,2.848,0.000,0.000,0.000,0.000,10.848,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_3,14.53,1.0,14.531,6.882E-002,8.000,2.753,0.000,0.000,0.000,0.000,10.753,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_1,2.78,1.0,2.775,0.360,8.000,14.414,0.000,0.000,0.000,0.000,22.414,No
+ Zone Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_2,2.54,1.0,2.544,0.393,8.000,15.725,0.000,0.000,0.000,0.000,23.725,No
+ Zone Internal Gains Nominal, THERMAL ZONE: LARGE_STORAGE_ROOM,50.26,1.0,50.256,1.990E-002,8.000,0.796,0.000,0.000,0.000,0.000,8.796,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_1,77.59,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_10,255.12,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_11,26.51,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_12,108.71,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_2,11.47,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_3,26.47,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_4,88.47,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_5,26.47,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_6,44.70,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_7,77.46,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_8,114.05,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: ROOF_9,26.51,0.0,N/A,0.000,0.000,0.000,0.000,0.000,0.000,0.000,0.000,No
+ Zone Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_1,102.48,10.0,10.248,9.758E-002,8.000,0.390,0.000,0.000,0.000,0.000,8.390,No
+ Zone Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_2,37.92,1.0,37.919,2.637E-002,8.000,1.055,0.000,0.000,0.000,0.000,9.055,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+ People Internal Gains Nominal, THERMAL ZONE: ALPHA_MEETING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: ALPHA_MEETING_ROOM,27.74,1.0,1.0,3.605E-002,27.742,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: BETA_MEETING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: BETA_MEETING_ROOM,13.87,1.0,1.0,7.207E-002,13.875,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: CLEANING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: CLEANING_ROOM,7.52,1.0,1.0,0.133,7.518,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: CORRIDOR_TOILET PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: CORRIDOR_TOILET,5.32,1.0,1.0,0.188,5.319,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: ENTREANCE_SHOW_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: ENTREANCE_SHOW_ROOM,83.63,1.0,1.0,1.196E-002,83.633,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: ENTREANCE_TOILET PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: ENTREANCE_TOILET,4.21,1.0,1.0,0.238,4.209,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: EXTRA_CLEANING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: EXTRA_CLEANING_ROOM,2.71,1.0,1.0,0.369,2.713,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_1 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: EXTRA_OFFICE_1,22.90,1.0,1.0,4.366E-002,22.903,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: EXTRA_OFFICE_2,29.06,1.0,1.0,3.441E-002,29.063,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: EXTRA_STORAGE PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: EXTRA_STORAGE,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_CORRIDOR PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_CORRIDOR,27.90,1.0,1.0,3.584E-002,27.900,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_1 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_MEETING_ROOM_1,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_MEETING_ROOM_2,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_3 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_MEETING_ROOM_3,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_OFFICE_2,14.05,1.0,1.0,7.119E-002,14.047,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_3 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_OFFICE_3,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_4 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_OFFICE_4,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_1 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_TOILET_1,4.07,1.0,1.0,0.246,4.069,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_TOILET_2,3.97,1.0,1.0,0.252,3.967,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: GAMMA_MEETING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: GAMMA_MEETING_ROOM,15.44,1.0,1.0,6.477E-002,15.440,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_CORRIDOR PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_CORRIDOR,38.62,1.0,1.0,2.590E-002,38.617,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_MEETING_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_MEETING_ROOM,14.05,1.0,1.0,7.119E-002,14.047,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_OFFICE_2,14.05,1.0,1.0,7.119E-002,14.047,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_3 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_OFFICE_3,14.53,1.0,1.0,6.882E-002,14.531,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_1 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_TOILET_1,2.78,1.0,1.0,0.360,2.775,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_TOILET_2,2.54,1.0,1.0,0.393,2.544,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: LARGE_STORAGE_ROOM PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: LARGE_STORAGE_ROOM,50.26,1.0,1.0,1.990E-002,50.256,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_2 PEOPLE 2,OFFICE OCCUPANCY,THERMAL ZONE: SOFTWARE_OFFICE_2,37.92,1.0,1.0,2.637E-002,37.919,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,1
+ People Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_1 PEOPLE 1,OFFICE OCCUPANCY,THERMAL ZONE: FINANCE_OFFICE_1,40.56,10.0,10.0,0.247,4.056,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,10
+ People Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_1 PEOPLE 1,OFFICE OCCUPANCY,THERMAL ZONE: HARDWARE_OFFICE_1,28.38,10.0,10.0,0.352,2.838,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,10
+ People Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_1 PEOPLE 1,OFFICE OCCUPANCY,THERMAL ZONE: SOFTWARE_OFFICE_1,102.48,10.0,10.0,9.758E-002,10.248,0.300,0.700,AutoCalculate,OFFICE ACTIVITY 1,No,3.8200E-008,0,10
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains Nominal, THERMAL ZONE: ALPHA_MEETING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: ALPHA_MEETING_ROOM,27.74,1.0,221.932,8.000,221.932,0.000,0.000,0.000,1.000,1.000,General,0.000,221.932
+ Lights Internal Gains Nominal, THERMAL ZONE: BETA_MEETING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: BETA_MEETING_ROOM,13.87,1.0,111.000,8.000,111.000,0.000,0.000,0.000,1.000,1.000,General,0.000,111.000
+ Lights Internal Gains Nominal, THERMAL ZONE: CLEANING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: CLEANING_ROOM,7.52,1.0,60.140,8.000,60.140,0.000,0.000,0.000,1.000,1.000,General,0.000,60.140
+ Lights Internal Gains Nominal, THERMAL ZONE: CORRIDOR_TOILET LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: CORRIDOR_TOILET,5.32,1.0,42.550,8.000,42.550,0.000,0.000,0.000,1.000,1.000,General,0.000,42.550
+ Lights Internal Gains Nominal, THERMAL ZONE: ENTREANCE_SHOW_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: ENTREANCE_SHOW_ROOM,83.63,1.0,669.064,8.000,669.064,0.000,0.000,0.000,1.000,1.000,General,0.000,669.064
+ Lights Internal Gains Nominal, THERMAL ZONE: ENTREANCE_TOILET LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: ENTREANCE_TOILET,4.21,1.0,33.676,8.000,33.676,0.000,0.000,0.000,1.000,1.000,General,0.000,33.676
+ Lights Internal Gains Nominal, THERMAL ZONE: EXTRA_CLEANING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: EXTRA_CLEANING_ROOM,2.71,1.0,21.700,8.000,21.700,0.000,0.000,0.000,1.000,1.000,General,0.000,21.700
+ Lights Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_1 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: EXTRA_OFFICE_1,22.90,1.0,183.224,8.000,183.224,0.000,0.000,0.000,1.000,1.000,General,0.000,183.224
+ Lights Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: EXTRA_OFFICE_2,29.06,1.0,232.500,8.000,232.500,0.000,0.000,0.000,1.000,1.000,General,0.000,232.500
+ Lights Internal Gains Nominal, THERMAL ZONE: EXTRA_STORAGE LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: EXTRA_STORAGE,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_CORRIDOR LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_CORRIDOR,27.90,1.0,223.202,8.000,223.202,0.000,0.000,0.000,1.000,1.000,General,0.000,223.202
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_1 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_MEETING_ROOM_1,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_MEETING_ROOM_2,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_3 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_MEETING_ROOM_3,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_OFFICE_2,14.05,1.0,112.375,8.000,112.375,0.000,0.000,0.000,1.000,1.000,General,0.000,112.375
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_3 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_OFFICE_3,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_4 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_OFFICE_4,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_1 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_TOILET_1,4.07,1.0,32.550,8.000,32.550,0.000,0.000,0.000,1.000,1.000,General,0.000,32.550
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: FINANCE_TOILET_2,3.97,1.0,31.734,8.000,31.734,0.000,0.000,0.000,1.000,1.000,General,0.000,31.734
+ Lights Internal Gains Nominal, THERMAL ZONE: GAMMA_MEETING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: GAMMA_MEETING_ROOM,15.44,1.0,123.520,8.000,123.520,0.000,0.000,0.000,1.000,1.000,General,0.000,123.520
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_CORRIDOR LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_CORRIDOR,38.62,1.0,308.937,8.000,308.937,0.000,0.000,0.000,1.000,1.000,General,0.000,308.937
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_MEETING_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_MEETING_ROOM,14.05,1.0,112.375,8.000,112.375,0.000,0.000,0.000,1.000,1.000,General,0.000,112.375
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_OFFICE_2,14.05,1.0,112.375,8.000,112.375,0.000,0.000,0.000,1.000,1.000,General,0.000,112.375
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_3 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_OFFICE_3,14.53,1.0,116.250,8.000,116.250,0.000,0.000,0.000,1.000,1.000,General,0.000,116.250
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_1 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_TOILET_1,2.78,1.0,22.200,8.000,22.200,0.000,0.000,0.000,1.000,1.000,General,0.000,22.200
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: HARDWARE_TOILET_2,2.54,1.0,20.350,8.000,20.350,0.000,0.000,0.000,1.000,1.000,General,0.000,20.350
+ Lights Internal Gains Nominal, THERMAL ZONE: LARGE_STORAGE_ROOM LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: LARGE_STORAGE_ROOM,50.26,1.0,402.050,8.000,402.050,0.000,0.000,0.000,1.000,1.000,General,0.000,402.050
+ Lights Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_2 LIGHTS 1,OFFICE LIGHT,THERMAL ZONE: SOFTWARE_OFFICE_2,37.92,1.0,303.350,8.000,303.350,0.000,0.000,0.000,1.000,1.000,General,0.000,303.350
+ Lights Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_1 LIGHTS 2,OFFICE LIGHT,THERMAL ZONE: FINANCE_OFFICE_1,40.56,10.0,324.500,8.000,32.450,0.000,0.000,0.000,1.000,1.000,General,0.000,324.500
+ Lights Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_1 LIGHTS 2,OFFICE LIGHT,THERMAL ZONE: HARDWARE_OFFICE_1,28.38,10.0,227.075,8.000,22.708,0.000,0.000,0.000,1.000,1.000,General,0.000,227.075
+ Lights Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_1 LIGHTS 2,OFFICE LIGHT,THERMAL ZONE: SOFTWARE_OFFICE_1,102.48,10.0,819.875,8.000,81.988,0.000,0.000,0.000,1.000,1.000,General,0.000,819.875
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: ALPHA_MEETING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: ALPHA_MEETING_ROOM,27.74,1.0,40.000,1.442,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: BETA_MEETING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: BETA_MEETING_ROOM,13.87,1.0,40.000,2.883,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: CLEANING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: CLEANING_ROOM,7.52,1.0,40.000,5.321,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: CORRIDOR_TOILET ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: CORRIDOR_TOILET,5.32,1.0,40.000,7.521,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: ENTREANCE_SHOW_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: ENTREANCE_SHOW_ROOM,83.63,1.0,40.000,0.478,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: ENTREANCE_TOILET ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: ENTREANCE_TOILET,4.21,1.0,40.000,9.502,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: EXTRA_CLEANING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: EXTRA_CLEANING_ROOM,2.71,1.0,40.000,14.747,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_1 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: EXTRA_OFFICE_1,22.90,1.0,40.000,1.746,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: EXTRA_OFFICE_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: EXTRA_OFFICE_2,29.06,1.0,40.000,1.376,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: EXTRA_STORAGE ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: EXTRA_STORAGE,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_CORRIDOR ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_CORRIDOR,27.90,1.0,40.000,1.434,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_1 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_MEETING_ROOM_1,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_MEETING_ROOM_2,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_3 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_MEETING_ROOM_3,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_OFFICE_2,14.05,1.0,40.000,2.848,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_3 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_OFFICE_3,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_4 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_OFFICE_4,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_1 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_TOILET_1,4.07,1.0,40.000,9.831,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_TOILET_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: FINANCE_TOILET_2,3.97,1.0,40.000,10.084,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: GAMMA_MEETING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: GAMMA_MEETING_ROOM,15.44,1.0,40.000,2.591,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_CORRIDOR ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_CORRIDOR,38.62,1.0,40.000,1.036,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_MEETING_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_MEETING_ROOM,14.05,1.0,40.000,2.848,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_OFFICE_2,14.05,1.0,40.000,2.848,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_3 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_OFFICE_3,14.53,1.0,40.000,2.753,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_1 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_TOILET_1,2.78,1.0,40.000,14.414,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_TOILET_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: HARDWARE_TOILET_2,2.54,1.0,40.000,15.725,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: LARGE_STORAGE_ROOM ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: LARGE_STORAGE_ROOM,50.26,1.0,40.000,0.796,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_2 ELECTRIC EQUIPMENT 1,OFFICE EQUIP,THERMAL ZONE: SOFTWARE_OFFICE_2,37.92,1.0,40.000,1.055,40.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: FINANCE_OFFICE_1 ELECTRIC EQUIPMENT 2,OFFICE EQUIP,THERMAL ZONE: FINANCE_OFFICE_1,40.56,10.0,40.000,0.986,4.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: HARDWARE_OFFICE_1 ELECTRIC EQUIPMENT 2,OFFICE EQUIP,THERMAL ZONE: HARDWARE_OFFICE_1,28.38,10.0,40.000,1.409,4.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+ ElectricEquipment Internal Gains Nominal, THERMAL ZONE: SOFTWARE_OFFICE_1 ELECTRIC EQUIPMENT 2,OFFICE EQUIP,THERMAL ZONE: SOFTWARE_OFFICE_1,102.48,10.0,40.000,0.390,4.000,0.000,0.000,0.000,1.000,General,0.000,36.000
+! <Shadowing/Sun Position Calculations Annual Simulations>, Shading Calculation Method, Shading Calculation Update Frequency Method, Shading Calculation Update Frequency {days}, Maximum Figures in Shadow Overlap Calculations {}, Polygon Clipping Algorithm, Pixel Counting Resolution, Sky Diffuse Modeling Algorithm, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,PolygonClipping,Periodic,20,15000,SutherlandHodgman,512,SimpleSkyDiffuseModeling,No,No,No
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s-m2},Volume Flow Rate/Exterior Surface Area {m3/s-m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ALPHA_MEETING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: ALPHA_MEETING_ROOM,27.74,1.0,1.834E-002,6.612E-004,2.266E-004,0.915,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: BETA_MEETING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: BETA_MEETING_ROOM,13.87,1.0,1.192E-002,8.592E-004,2.266E-004,1.190,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: CLEANING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: CLEANING_ROOM,7.52,1.0,8.554E-003,1.138E-003,2.266E-004,1.576,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: CORRIDOR_TOILET NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: CORRIDOR_TOILET,5.32,1.0,6.772E-003,1.273E-003,2.266E-004,1.763,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ENTREANCE_SHOW_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: ENTREANCE_SHOW_ROOM,83.63,1.0,5.082E-002,6.077E-004,2.266E-004,0.841,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ENTREANCE_TOILET NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: ENTREANCE_TOILET,4.21,1.0,5.790E-003,1.375E-003,2.266E-004,1.905,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: EXTRA_CLEANING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: EXTRA_CLEANING_ROOM,2.71,1.0,4.502E-003,1.660E-003,2.266E-004,2.298,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: EXTRA_OFFICE_1 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: EXTRA_OFFICE_1,22.90,1.0,1.729E-002,7.551E-004,2.266E-004,1.046,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: EXTRA_OFFICE_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: EXTRA_OFFICE_2,29.06,1.0,1.999E-002,6.877E-004,2.266E-004,0.952,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: EXTRA_STORAGE NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: EXTRA_STORAGE,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_CORRIDOR NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_CORRIDOR,27.90,1.0,2.844E-002,1.019E-003,2.266E-004,1.411,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_1 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_MEETING_ROOM_1,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_MEETING_ROOM_2,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_MEETING_ROOM_3 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_MEETING_ROOM_3,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_OFFICE_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_OFFICE_2,14.05,1.0,1.202E-002,8.556E-004,2.266E-004,1.185,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_OFFICE_3 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_OFFICE_3,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_OFFICE_4 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_OFFICE_4,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_TOILET_1 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_TOILET_1,4.07,1.0,5.723E-003,1.407E-003,2.266E-004,1.948,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_TOILET_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: FINANCE_TOILET_2,3.97,1.0,5.600E-003,1.412E-003,2.266E-004,1.955,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: GAMMA_MEETING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: GAMMA_MEETING_ROOM,15.44,1.0,1.276E-002,8.263E-004,2.266E-004,1.144,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_CORRIDOR NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_CORRIDOR,38.62,1.0,3.510E-002,9.089E-004,2.266E-004,1.258,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_MEETING_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_MEETING_ROOM,14.05,1.0,1.202E-002,8.556E-004,2.266E-004,1.185,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_OFFICE_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_OFFICE_2,14.05,1.0,1.202E-002,8.556E-004,2.266E-004,1.185,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_OFFICE_3 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_OFFICE_3,14.53,1.0,1.228E-002,8.448E-004,2.266E-004,1.170,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_TOILET_1 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_TOILET_1,2.78,1.0,4.576E-003,1.649E-003,2.266E-004,2.283,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_TOILET_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: HARDWARE_TOILET_2,2.54,1.0,4.376E-003,1.720E-003,2.266E-004,2.382,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: LARGE_STORAGE_ROOM NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: LARGE_STORAGE_ROOM,50.26,1.0,2.941E-002,5.853E-004,2.266E-004,0.810,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: SOFTWARE_OFFICE_2 NEW INFILTRATION,OFFICE INFIL,THERMAL ZONE: SOFTWARE_OFFICE_2,37.92,1.0,2.391E-002,6.305E-004,2.266E-004,0.873,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: FINANCE_OFFICE_1 NEW INFILTRATION 2,OFFICE INFIL,THERMAL ZONE: FINANCE_OFFICE_1,40.56,10.0,2.436E-002,6.005E-004,2.266E-004,0.831,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: HARDWARE_OFFICE_1 NEW INFILTRATION 2,OFFICE INFIL,THERMAL ZONE: HARDWARE_OFFICE_1,28.38,10.0,1.963E-002,6.914E-004,2.266E-004,0.957,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: SOFTWARE_OFFICE_1 NEW INFILTRATION 2,OFFICE INFIL,THERMAL ZONE: SOFTWARE_OFFICE_1,102.48,10.0,4.247E-002,4.144E-004,2.266E-004,0.574,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_1 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_1,77.59,0.0,2.782E-002,3.585E-004,2.266E-004,1.462,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_10 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_10,255.12,0.0,7.662E-002,3.003E-004,2.266E-004,1.445,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_11 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_11,26.51,0.0,8.911E-003,3.361E-004,2.266E-004,2.342,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_12 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_12,108.71,0.0,3.513E-002,3.232E-004,2.266E-004,1.488,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_2 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_2,11.47,0.0,6.287E-003,5.481E-004,2.266E-004,2.346,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_3 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_3,26.47,0.0,8.900E-003,3.362E-004,2.266E-004,2.343,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_4 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_4,88.47,0.0,2.720E-002,3.074E-004,2.266E-004,1.586,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_5 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_5,26.47,0.0,8.900E-003,3.362E-004,2.266E-004,2.343,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_6 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_6,44.70,0.0,1.614E-002,3.612E-004,2.266E-004,1.642,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_7 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_7,77.46,0.0,2.779E-002,3.588E-004,2.266E-004,1.463,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_8 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_8,114.05,0.0,3.672E-002,3.219E-004,2.266E-004,1.483,1.000,0.000,0.000,0.000
+ ZoneInfiltration Airflow Stats Nominal, THERMAL ZONE: ROOF_9 NEW INFILTRATION 1,REMONI ROOF INFILL,THERMAL ZONE: ROOF_9,26.51,0.0,8.911E-003,3.361E-004,2.266E-004,2.342,1.000,0.000,0.000,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,THERMAL ZONE: ALPHA_MEETING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: BETA_MEETING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: CLEANING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: CORRIDOR_TOILET,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ENTREANCE_SHOW_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ENTREANCE_TOILET,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: EXTRA_CLEANING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: EXTRA_OFFICE_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: EXTRA_OFFICE_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: EXTRA_STORAGE,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_CORRIDOR,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_MEETING_ROOM_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_MEETING_ROOM_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_MEETING_ROOM_3,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_OFFICE_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_OFFICE_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_OFFICE_3,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_OFFICE_4,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_TOILET_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: FINANCE_TOILET_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: GAMMA_MEETING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_CORRIDOR,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_MEETING_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_OFFICE_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_OFFICE_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_OFFICE_3,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_TOILET_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: HARDWARE_TOILET_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: LARGE_STORAGE_ROOM,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_10,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_11,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_12,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_2,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_3,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_4,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_5,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_6,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_7,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_8,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: ROOF_9,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SOFTWARE_OFFICE_1,Mixing/Well-Stirred
+RoomAir Model,THERMAL ZONE: SOFTWARE_OFFICE_2,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    4
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: ALPHA_MEETING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: BETA_MEETING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: CLEANING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: CORRIDOR_TOILET,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: ENTREANCE_SHOW_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: ENTREANCE_TOILET,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: EXTRA_CLEANING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: EXTRA_OFFICE_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: EXTRA_OFFICE_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: EXTRA_STORAGE,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_CORRIDOR,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_3,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_3,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_4,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_TOILET_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: FINANCE_TOILET_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: GAMMA_MEETING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_CORRIDOR,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_MEETING_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_3,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_TOILET_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_TOILET_2,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: LARGE_STORAGE_ROOM,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SOFTWARE_OFFICE_1,   1.1500    
+ Heating Sizing Factor Information, Zone THERMAL ZONE: SOFTWARE_OFFICE_2,   1.1500    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: ALPHA_MEETING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: BETA_MEETING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: CLEANING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: CORRIDOR_TOILET,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: ENTREANCE_SHOW_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: ENTREANCE_TOILET,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: EXTRA_CLEANING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: EXTRA_OFFICE_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: EXTRA_OFFICE_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: EXTRA_STORAGE,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_CORRIDOR,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_MEETING_ROOM_3,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_3,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_OFFICE_4,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_TOILET_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: FINANCE_TOILET_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: GAMMA_MEETING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_CORRIDOR,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_MEETING_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_OFFICE_3,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_TOILET_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: HARDWARE_TOILET_2,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: LARGE_STORAGE_ROOM,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SOFTWARE_OFFICE_1,   1.1500    
+ Cooling Sizing Factor Information, Zone THERMAL ZONE: SOFTWARE_OFFICE_2,   1.1500    
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, THERMAL ZONE: ALPHA_MEETING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 14:15:00, 9.00000, 6.70655E-003, 27.74150, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: ALPHA_MEETING_ROOM, Heating, 2550.77157, 2933.38730, 0.10849, 0.12476, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 27.74150, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: BETA_MEETING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 13:45:00, 8.94750, 6.70648E-003, 13.87500, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: BETA_MEETING_ROOM, Heating, 1297.51189, 1492.13867, 5.52354E-002, 6.35208E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 13.87500, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: CLEANING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP ANN HTG WIND 99.6% CONDNS WS=>MCDB, 1/21 09:00:00, 6.00000, 5.81182E-003, 7.51750, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: CLEANING_ROOM, Heating, 872.67591, 1003.57730, 3.71946E-002, 4.27738E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 7.51750, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: CORRIDOR_TOILET, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 11:45:00, 8.74900, 6.28154E-003, 5.31875, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: CORRIDOR_TOILET, Heating, 631.79620, 726.56563, 2.69140E-002, 3.09511E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 5.31875, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: ENTREANCE_SHOW_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP ANN HTG WIND 99.6% CONDNS WS=>MCDB, 1/21 06:30:00, 6.00000, 5.81182E-003, 83.63300, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: ENTREANCE_SHOW_ROOM, Heating, 6134.65222, 7054.85005, 0.26051, 0.29958, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 83.63300, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: ENTREANCE_TOILET, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 10:15:00, 7.96150, 6.28052E-003, 4.20945, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: ENTREANCE_TOILET, Heating, 526.87249, 605.90336, 2.24631E-002, 2.58326E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 4.20945, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_CLEANING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 09:45:00, 7.22550, 6.32862E-003, 2.71250, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_CLEANING_ROOM, Heating, 395.46151, 454.78074, 1.68703E-002, 1.94009E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 2.71250, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_OFFICE_1, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 15:15:00, 8.93700, 6.70646E-003, 22.90300, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_OFFICE_1, Heating, 1932.20174, 2222.03200, 8.21326E-002, 9.44524E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 22.90300, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_OFFICE_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 15:15:00, 8.93700, 6.70646E-003, 29.06250, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_OFFICE_2, Heating, 2305.65213, 2651.49995, 9.79678E-002, 0.11266, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 29.06250, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_STORAGE, Cooling, 4.65230, 5.35015, 5.42309E-004, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 06:15:00, 5.35750, 5.55625E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: EXTRA_STORAGE, Heating, 1342.14213, 1543.46345, 5.71304E-002, 6.56999E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_CORRIDOR, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP ANN HTG WIND 99.6% CONDNS WS=>MCDB, 1/21 06:30:00, 6.00000, 5.81182E-003, 27.90025, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_CORRIDOR, Heating, 2936.53019, 3377.00972, 0.12500, 0.14375, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 27.90025, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_1, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_1, Heating, 1350.36705, 1552.92210, 5.74397E-002, 6.60557E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_2, Heating, 1349.26687, 1551.65691, 5.73926E-002, 6.60015E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_3, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_MEETING_ROOM_3, Heating, 1342.11870, 1543.43650, 5.70866E-002, 6.56496E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_1, Cooling, 8.74408, 10.05570, 9.53823E-004, 9.43895E-002, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 06:15:00, 5.35750, 5.55625E-003, 40.56250, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_1, Heating, 2158.89627, 2482.73071, 9.13732E-002, 0.10508, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 40.56250, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_2, Heating, 1332.95636, 1532.89981, 5.67068E-002, 6.52128E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_3, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_3, Heating, 1357.80074, 1561.47085, 5.77580E-002, 6.64216E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_4, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_OFFICE_4, Heating, 1355.36838, 1558.67363, 5.76538E-002, 6.63019E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_TOILET_1, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 10:45:00, 8.27650, 6.28092E-003, 4.06875, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_TOILET_1, Heating, 518.90517, 596.74095, 2.21248E-002, 2.54435E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 4.06875, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_TOILET_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 10:15:00, 7.96150, 6.28052E-003, 3.96680, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: FINANCE_TOILET_2, Heating, 502.76792, 578.18311, 2.14364E-002, 2.46519E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 3.96680, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: GAMMA_MEETING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 15.44000, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: GAMMA_MEETING_ROOM, Heating, 1398.57313, 1608.35910, 5.94801E-002, 6.84021E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 15.44000, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_CORRIDOR, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP ANN HTG WIND 99.6% CONDNS WS=>MCDB, 1/21 06:30:00, 6.00000, 5.81182E-003, 38.61713, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_CORRIDOR, Heating, 3648.75548, 4196.06881, 0.15522, 0.17850, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 38.61713, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_MEETING_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_MEETING_ROOM, Heating, 1409.33467, 1620.73488, 5.99763E-002, 6.89728E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_1, Cooling, 7.32815, 8.42737, 8.13695E-004, 9.43895E-002, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 06:15:00, 5.35750, 5.55625E-003, 28.38438, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_1, Heating, 1651.74214, 1899.50346, 6.31785E-002, 9.43895E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 06:15:00, -9.10000, 1.73761E-003, 28.38438, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_2, Heating, 1417.53838, 1630.16913, 6.03275E-002, 6.93766E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.04687, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_3, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 15:15:00, 9.33700, 6.28231E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_OFFICE_3, Heating, 1353.10817, 1556.07440, 5.75570E-002, 6.61906E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 14.53125, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_TOILET_1, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 14:00:00, 9.40000, 6.28239E-003, 2.77500, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_TOILET_1, Heating, 398.78761, 458.60575, 1.70111E-002, 1.95628E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 2.77500, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_TOILET_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY 2% CONDNS WB=>MCDB, 1/21 10:15:00, 6.26150, 5.91882E-003, 2.54375, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: HARDWARE_TOILET_2, Heating, 381.36840, 438.57366, 1.62712E-002, 1.87119E-002, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 2.54375, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: LARGE_STORAGE_ROOM, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 07:45:00, 6.11350, 5.85805E-003, 50.25625, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: LARGE_STORAGE_ROOM, Heating, 3437.50553, 3953.13136, 0.14590, 0.16779, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 50.25625, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SOFTWARE_OFFICE_1, Cooling, 17.22827, 19.81251, 1.81090E-003, 9.43895E-002, AARHUS.AP JANUARY .4% CONDNS DB=>MCWB, 1/21 06:15:00, 5.35750, 5.55625E-003, 102.48438, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SOFTWARE_OFFICE_1, Heating, 4901.58375, 5636.82132, 0.20712, 0.23819, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 102.48438, 10.00000, 9.43895E-002, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SOFTWARE_OFFICE_2, Cooling, 0.00000, 0.00000, 0.00000, 9.43895E-003, AARHUS.AP JANUARY .4% CONDNS WB=>MCDB, 1/21 15:15:00, 8.93700, 6.70646E-003, 37.91875, 1.00000, 9.43895E-003, 0.00000
+ Zone Sizing Information, THERMAL ZONE: SOFTWARE_OFFICE_2, Heating, 2737.44295, 3148.05939, 0.11623, 0.13367, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00, -9.10000, 1.73761E-003, 37.91875, 1.00000, 9.43895E-003, 0.00000
+! <System Sizing Information>, System Name, Load Type, Peak Load Kind, User Design Capacity [W], Calc Des Air Flow Rate [m3/s], User Des Air Flow Rate [m3/s], Design Day Name, Date/Time of Peak
+ System Sizing Information, REMONI_VENTILATION, Cooling, Sensible, 0.00, 0.45307, 0.45307, ,  00:00:00
+ System Sizing Information, REMONI_VENTILATION, Heating, Sensible, 69250.45, 2.22458, 2.22458, AARHUS.AP ANN HTG 99.6% CONDNS DB, 1/21 07:00:00
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD, Design Size Maximum Water Flow Rate [m3/s], 6.48096E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD, Design Size U-Factor Times Area Value [W/K], 69.44781
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER, Design Size Maximum Air Flow Rate [m3/s], 0.12476
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 20, Design Size Maximum Water Flow Rate [m3/s], 3.29670E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 20, Design Size U-Factor Times Area Value [W/K], 35.42343
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 43, Design Size Maximum Water Flow Rate [m3/s], 2.21728E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 43, Design Size U-Factor Times Area Value [W/K], 23.82037
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 31, Design Size Maximum Water Flow Rate [m3/s], 1.60526E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 31, Design Size U-Factor Times Area Value [W/K], 17.20112
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 1, Design Size Maximum Air Flow Rate [m3/s], 3.09511E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 29, Design Size Maximum Water Flow Rate [m3/s], 1.55868E-004
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 29, Design Size U-Factor Times Area Value [W/K], 167.03359
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 2, Design Size Maximum Air Flow Rate [m3/s], 0.29958
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 40, Design Size Maximum Water Flow Rate [m3/s], 1.33867E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 40, Design Size U-Factor Times Area Value [W/K], 14.37684
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 39, Design Size Maximum Water Flow Rate [m3/s], 1.00478E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 39, Design Size U-Factor Times Area Value [W/K], 10.78719
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 33, Design Size Maximum Water Flow Rate [m3/s], 4.90931E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 33, Design Size U-Factor Times Area Value [W/K], 52.60862
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 3, Design Size Maximum Air Flow Rate [m3/s], 9.44524E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 35, Design Size Maximum Water Flow Rate [m3/s], 5.85817E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 35, Design Size U-Factor Times Area Value [W/K], 62.77695
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 4, Design Size Maximum Air Flow Rate [m3/s], 0.11266
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 36, Design Size Maximum Water Flow Rate [m3/s], 3.41009E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 36, Design Size U-Factor Times Area Value [W/K], 36.64229
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 32, Design Size Maximum Water Flow Rate [m3/s], 7.46109E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 32, Design Size U-Factor Times Area Value [W/K], 79.95537
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 5, Design Size Maximum Air Flow Rate [m3/s], 0.14375
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 5, Design Size Maximum Water Flow Rate [m3/s], 3.43099E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 5, Design Size U-Factor Times Area Value [W/K], 36.76612
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 6, Design Size Maximum Air Flow Rate [m3/s], 6.60557E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 37, Design Size Maximum Water Flow Rate [m3/s], 3.42820E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 37, Design Size U-Factor Times Area Value [W/K], 36.73617
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 7, Design Size Maximum Air Flow Rate [m3/s], 6.60015E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 34, Design Size Maximum Water Flow Rate [m3/s], 3.41003E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 34, Design Size U-Factor Times Area Value [W/K], 36.54159
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 8, Design Size Maximum Air Flow Rate [m3/s], 6.56496E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 41, Design Size Maximum Water Flow Rate [m3/s], 5.48529E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 41, Design Size U-Factor Times Area Value [W/K], 58.76689
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 9, Design Size Maximum Air Flow Rate [m3/s], 0.10508
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 1, Design Size Maximum Water Flow Rate [m3/s], 3.38675E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 1, Design Size U-Factor Times Area Value [W/K], 36.29194
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 10, Design Size Maximum Air Flow Rate [m3/s], 6.52128E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 26, Design Size Maximum Water Flow Rate [m3/s], 3.44988E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 26, Design Size U-Factor Times Area Value [W/K], 36.96847
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 11, Design Size Maximum Air Flow Rate [m3/s], 6.64216E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 38, Design Size Maximum Water Flow Rate [m3/s], 3.44370E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 38, Design Size U-Factor Times Area Value [W/K], 36.90226
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 12, Design Size Maximum Air Flow Rate [m3/s], 6.63019E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 24, Design Size Maximum Water Flow Rate [m3/s], 1.31843E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 24, Design Size U-Factor Times Area Value [W/K], 14.15914
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 21, Design Size Maximum Water Flow Rate [m3/s], 1.27742E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 21, Design Size U-Factor Times Area Value [W/K], 13.71854
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 28, Design Size Maximum Water Flow Rate [m3/s], 3.55347E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 28, Design Size U-Factor Times Area Value [W/K], 38.07878
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 13, Design Size Maximum Air Flow Rate [m3/s], 6.84021E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 23, Design Size Maximum Water Flow Rate [m3/s], 9.27070E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 23, Design Size U-Factor Times Area Value [W/K], 99.34869
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 14, Design Size Maximum Air Flow Rate [m3/s], 0.17850
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 18, Design Size Maximum Water Flow Rate [m3/s], 3.58082E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 18, Design Size U-Factor Times Area Value [W/K], 38.37103
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 15, Design Size Maximum Air Flow Rate [m3/s], 6.89728E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 19, Design Size Maximum Water Flow Rate [m3/s], 4.19672E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 19, Design Size U-Factor Times Area Value [W/K], 44.69404
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 16, Design Size Maximum Air Flow Rate [m3/s], 9.43895E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 16, Design Size Maximum Water Flow Rate [m3/s], 3.60166E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 16, Design Size U-Factor Times Area Value [W/K], 38.59434
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 17, Design Size Maximum Air Flow Rate [m3/s], 6.93766E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 22, Design Size Maximum Water Flow Rate [m3/s], 3.43796E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 22, Design Size U-Factor Times Area Value [W/K], 36.84073
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 18, Design Size Maximum Air Flow Rate [m3/s], 6.61906E-002
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 25, Design Size Maximum Water Flow Rate [m3/s], 1.01323E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 25, Design Size U-Factor Times Area Value [W/K], 10.87816
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 30, Design Size Maximum Water Flow Rate [m3/s], 9.68975E-006
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 30, Design Size U-Factor Times Area Value [W/K], 10.40214
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 2, Design Size Maximum Water Flow Rate [m3/s], 8.73396E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 2, Design Size U-Factor Times Area Value [W/K], 93.86494
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 14, Design Size Maximum Water Flow Rate [m3/s], 1.24539E-004
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 14, Design Size U-Factor Times Area Value [W/K], 133.44591
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 19, Design Size Maximum Air Flow Rate [m3/s], 0.23819
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 17, Design Size Maximum Water Flow Rate [m3/s], 6.95525E-005
+ Component Sizing Information, ZoneHVAC:Baseboard:Convective:Water, HW BASEBOARD 17, Design Size U-Factor Times Area Value [W/K], 74.53455
+ Component Sizing Information, AirTerminal:SingleDuct:ConstantVolume:NoReheat, DIFFUSER 20, Design Size Maximum Air Flow Rate [m3/s], 0.13367
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Sum of Air Terminal Maximum Flow Rates [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Adjusted Heating Design Air Flow Rate [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Adjusted Cooling Design Air Flow Rate [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Adjusted Main Design Air Flow Rate [m3/s], 2.22458
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, User Heating Air Flow Ratio [], 0.30000
+ Component Sizing Information, AirLoopHVAC, REMONI_VENTILATION, Calculated Heating Air Flow Ratio [], 1.00000
+!<Controller:MechanicalVentilation>,Name,Availability Schedule Name,Demand Controlled Ventilation {Yes/No},System Outdoor Air Method,Zone Maximum Outdoor Air Fraction,Number of Zones,Zone Name,DSOA Name,DSZAD Name
+ Controller:MechanicalVentilation,CONTROLLER MECHANICAL VENTILATION 1,ALWAYS ON DISCRETE HVAC_LIBRARY,No,ZoneSum,1.00,21,THERMAL ZONE: ALPHA_MEETING_ROOM,NEW VENTILATION,THERMAL ZONE: ALPHA_MEETING_ROOM DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: CORRIDOR_TOILET,NEW VENTILATION,THERMAL ZONE: CORRIDOR_TOILET DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: ENTREANCE_SHOW_ROOM,NEW VENTILATION,THERMAL ZONE: ENTREANCE_SHOW_ROOM DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: EXTRA_OFFICE_1,NEW VENTILATION,THERMAL ZONE: EXTRA_OFFICE_1 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: EXTRA_OFFICE_2,NEW VENTILATION,THERMAL ZONE: EXTRA_OFFICE_2 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_CORRIDOR,NEW VENTILATION,THERMAL ZONE: FINANCE_CORRIDOR DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_MEETING_ROOM_1,NEW VENTILATION,THERMAL ZONE: FINANCE_MEETING_ROOM_1 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_MEETING_ROOM_2,NEW VENTILATION,THERMAL ZONE: FINANCE_MEETING_ROOM_2 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_MEETING_ROOM_3,NEW VENTILATION,THERMAL ZONE: FINANCE_MEETING_ROOM_3 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_OFFICE_1,NEW VENTILATION,THERMAL ZONE: FINANCE_OFFICE_1 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_OFFICE_2,NEW VENTILATION,THERMAL ZONE: FINANCE_OFFICE_2 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_OFFICE_3,NEW VENTILATION,THERMAL ZONE: FINANCE_OFFICE_3 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: FINANCE_OFFICE_4,NEW VENTILATION,THERMAL ZONE: FINANCE_OFFICE_4 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: GAMMA_MEETING_ROOM,NEW VENTILATION,THERMAL ZONE: GAMMA_MEETING_ROOM DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: HARDWARE_CORRIDOR,NEW VENTILATION,THERMAL ZONE: HARDWARE_CORRIDOR DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: HARDWARE_MEETING_ROOM,NEW VENTILATION,THERMAL ZONE: HARDWARE_MEETING_ROOM DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: HARDWARE_OFFICE_1,NEW VENTILATION,THERMAL ZONE: HARDWARE_OFFICE_1 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: HARDWARE_OFFICE_2,NEW VENTILATION,THERMAL ZONE: HARDWARE_OFFICE_2 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: HARDWARE_OFFICE_3,NEW VENTILATION,THERMAL ZONE: HARDWARE_OFFICE_3 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SOFTWARE_OFFICE_1,NEW VENTILATION,THERMAL ZONE: SOFTWARE_OFFICE_1 DESIGN SPEC ZONE AIR DIST,THERMAL ZONE: SOFTWARE_OFFICE_2,NEW VENTILATION,THERMAL ZONE: SOFTWARE_OFFICE_2 DESIGN SPEC ZONE AIR DIST
+ Component Sizing Information, Controller:OutdoorAir, OUTDOOR AIR CONTROLLER, Maximum Outdoor Air Flow Rate [m3/s], 2.22458
+ Component Sizing Information, Controller:OutdoorAir, OUTDOOR AIR CONTROLLER, Minimum Outdoor Air Flow Rate [m3/s], 0.45307
+ Component Sizing Information, Fan:ConstantVolume, CONST SPD FAN, Design Size Maximum Flow Rate [m3/s], 2.22458
+ Component Sizing Information, Fan:ConstantVolume, CONST SPD FAN, User-Specified Maximum Flow Rate [m3/s], 1.12230
+ Component Sizing Information, PlantLoop, REMONI_DH, Maximum Loop Flow Rate [m3/s], 1.39566E-003
+ Component Sizing Information, PlantLoop, REMONI_DH, Plant Loop Volume [m3], 0.16748
+ Component Sizing Information, PlantLoop, REMONI_DH, Design Supply Temperature [C], 82.00000
+ Component Sizing Information, PlantLoop, REMONI_DH, Design Return Temperature [C], 71.00000
+ Component Sizing Information, PlantLoop, REMONI_DH, Sizing option (Coincident/NonCoincident), 1.00000
+ Component Sizing Information, Pump:VariableSpeed, VAR SPD PUMP, Design Flow Rate [m3/s], 1.39566E-003
+ Component Sizing Information, Pump:VariableSpeed, VAR SPD PUMP, Design Power Consumption [W], 356.57438
+ Component Sizing Information, DistrictHeating:Water, DISTRICT HEATING, Design Size Nominal Capacity [W], 64441.34583
+ Component Sizing Information, DistrictHeating:Water, DISTRICT HEATING, User-Specified Nominal Capacity [W], 1000000.00000
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values, Sky Temperature Model
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,RUN PERIOD 1,WeatherFileRunPeriod,01/01/2006,01/21/2006,Sunday,21,Use RunPeriod Specified Day,No,No,No,Yes,Yes,Clark and Allen
+Environment:Daylight Saving,No,RunPeriod Object
+Environment:WarmupDays,  7
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,THERMAL ZONE: ALPHA_MEETING_ROOM,RunPeriod: RUN PERIOD 1,3.1611439264E-002,0.1167768343,Pass,Pass,7.0982114594E-002,0.2180810385,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: BETA_MEETING_ROOM,RunPeriod: RUN PERIOD 1,8.7226891009E-004,7.5281629406E-004,Pass,Pass,8.2267006387E-002,0.2395814190,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: CLEANING_ROOM,RunPeriod: RUN PERIOD 1,1.2526582987E-003,8.0681363058E-004,Pass,Pass,4.8031123268E-003,5.7130478873E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: CORRIDOR_TOILET,RunPeriod: RUN PERIOD 1,9.7706638112E-003,8.0063641683E-002,Pass,Pass,7.6303538288E-003,3.0952225422E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ENTREANCE_SHOW_ROOM,RunPeriod: RUN PERIOD 1,8.6168522925E-003,7.1488629268E-002,Pass,Pass,1.4839709826E-002,3.6939793450E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ENTREANCE_TOILET,RunPeriod: RUN PERIOD 1,1.1243651100E-003,8.9930882174E-004,Pass,Pass,2.5686132778E-003,3.5866802969E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: EXTRA_CLEANING_ROOM,RunPeriod: RUN PERIOD 1,1.4854880663E-003,9.8477122580E-004,Pass,Pass,2.6283949273E-003,3.5618650750E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: EXTRA_OFFICE_1,RunPeriod: RUN PERIOD 1,8.9558997440E-003,7.5698829347E-002,Pass,Pass,6.1142027045E-002,0.1157986441,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: EXTRA_OFFICE_2,RunPeriod: RUN PERIOD 1,8.6818343902E-003,7.3315047296E-002,Pass,Pass,1.8657711906E-002,3.8305042003E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: EXTRA_STORAGE,RunPeriod: RUN PERIOD 1,1.0746728177E-003,7.8143294562E-004,Pass,Pass,1.0940661559E-002,1.4693251005E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_CORRIDOR,RunPeriod: RUN PERIOD 1,9.5175854242E-003,8.0680380895E-002,Pass,Pass,8.1878494651E-003,3.3921308939E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_MEETING_ROOM_1,RunPeriod: RUN PERIOD 1,9.1016353315E-003,7.7260469477E-002,Pass,Pass,1.0653136339E-002,3.3327080801E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_MEETING_ROOM_2,RunPeriod: RUN PERIOD 1,9.1539738674E-003,7.7104838947E-002,Pass,Pass,1.0347487652E-002,3.3121337287E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_MEETING_ROOM_3,RunPeriod: RUN PERIOD 1,9.2083922433E-003,7.6613102131E-002,Pass,Pass,1.0331370892E-002,3.3037752901E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_OFFICE_1,RunPeriod: RUN PERIOD 1,6.5441078041E-003,5.4506805679E-002,Pass,Pass,1.7103691614E-002,3.4453811392E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_OFFICE_2,RunPeriod: RUN PERIOD 1,9.5665797316E-003,7.7821543242E-002,Pass,Pass,1.2131936890E-002,3.3360378064E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_OFFICE_3,RunPeriod: RUN PERIOD 1,9.3979064036E-003,7.7369074584E-002,Pass,Pass,1.1651639014E-002,3.3272921891E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_OFFICE_4,RunPeriod: RUN PERIOD 1,9.3301833203E-003,7.7629462963E-002,Pass,Pass,1.5907684185E-002,3.5067785543E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_TOILET_1,RunPeriod: RUN PERIOD 1,1.5373316265E-003,1.0084372929E-003,Pass,Pass,2.7115995942E-003,3.4960069552E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: FINANCE_TOILET_2,RunPeriod: RUN PERIOD 1,1.2818563000E-003,9.5890829931E-004,Pass,Pass,2.6139109622E-003,3.4315183574E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: GAMMA_MEETING_ROOM,RunPeriod: RUN PERIOD 1,9.1934466341E-003,7.5903115420E-002,Pass,Pass,1.0370940073E-002,3.3114201503E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_CORRIDOR,RunPeriod: RUN PERIOD 1,9.1781731852E-003,7.7357403244E-002,Pass,Pass,8.4191155389E-003,3.4968399172E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_MEETING_ROOM,RunPeriod: RUN PERIOD 1,9.5592654893E-003,8.1524596971E-002,Pass,Pass,4.5848505297E-002,6.4839853374E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_OFFICE_1,RunPeriod: RUN PERIOD 1,7.6433730123E-003,6.3802614428E-002,Pass,Pass,1.3659712670E-002,3.2899317253E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_OFFICE_2,RunPeriod: RUN PERIOD 1,9.6093475466E-003,8.2071514282E-002,Pass,Pass,9.7629580721E-002,0.2245373080,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_OFFICE_3,RunPeriod: RUN PERIOD 1,9.3213502679E-003,7.7237657016E-002,Pass,Pass,1.6682089322E-002,3.6228627559E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_TOILET_1,RunPeriod: RUN PERIOD 1,1.1971893538E-003,8.8976483563E-004,Pass,Pass,2.4487859887E-003,3.6328898822E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: HARDWARE_TOILET_2,RunPeriod: RUN PERIOD 1,1.4370360115E-003,1.0395374899E-003,Pass,Pass,2.4618663206E-003,3.7044360574E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: LARGE_STORAGE_ROOM,RunPeriod: RUN PERIOD 1,9.8447827165E-004,7.2720433934E-004,Pass,Pass,7.5439855554E-003,9.7095394144E-003,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_1,RunPeriod: RUN PERIOD 1,1.1228376212E-002,1.2671134248E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_10,RunPeriod: RUN PERIOD 1,1.0379934697E-002,1.1563379971E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_11,RunPeriod: RUN PERIOD 1,1.1056855650E-002,1.2404265207E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_12,RunPeriod: RUN PERIOD 1,1.0728042985E-002,1.1896029640E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_2,RunPeriod: RUN PERIOD 1,1.3317662887E-002,1.5395996422E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_3,RunPeriod: RUN PERIOD 1,1.1051676531E-002,1.2399911646E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_4,RunPeriod: RUN PERIOD 1,1.0537810445E-002,1.1614062423E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_5,RunPeriod: RUN PERIOD 1,1.1004883280E-002,1.2280087245E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_6,RunPeriod: RUN PERIOD 1,1.1254043962E-002,1.2739541608E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_7,RunPeriod: RUN PERIOD 1,1.1191553994E-002,1.2543934881E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_8,RunPeriod: RUN PERIOD 1,3.6902310878E-002,3.3286098140E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: ROOF_9,RunPeriod: RUN PERIOD 1,1.1003916988E-002,1.2278875317E-002,Pass,Pass,0.0000000000,0.0000000000,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SOFTWARE_OFFICE_1,RunPeriod: RUN PERIOD 1,6.3604274091E-003,5.4078252700E-002,Pass,Pass,1.9663407459E-002,3.9960073266E-002,Pass,Pass
+ Warmup Convergence Information,THERMAL ZONE: SOFTWARE_OFFICE_2,RunPeriod: RUN PERIOD 1,8.2093224477E-003,7.0103821428E-002,Pass,Pass,1.7360186230E-002,3.9337752166E-002,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data
