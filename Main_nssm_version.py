@@ -18,8 +18,8 @@ from neuromancer.modules import blocks
 
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+#Data loading and extractions of states (X), outputs (Y) and control inputs (U)
 
-# Load your CSV data
 df = pd.read_csv("CSV_files/dataframe_output_jan_Max_speed.csv")
 df2 = pd.read_csv("CSV_files/dataframe_output_jan_half_speed.csv")
 df3 = pd.read_csv("CSV_files/dataframe_output_jan_zero_speed.csv")
@@ -27,15 +27,12 @@ df3 = pd.read_csv("CSV_files/dataframe_output_jan_zero_speed.csv")
 df = df[:-16]
 df2 = df2[:-16]
 df3 = df3[:-16]
-# Extract the relevant columns for states (X), outputs (Y), and control inputs (U)
-# X_columns = ['zn_soft1_temp','air_loop_fan_mass_flow']
+
 X_columns = ['zn_soft1_temp', 'zn_finance1_temp',
              'Indoor_CO2_zn0', 'Indoor_CO2_zn1',
              'air_loop_fan_electric_power', 'Occupancy_schedule'
                 ]                                               # should contain relevant columns
-U_columns = [# 'Occupancy_schedule',
-             'air_loop_fan_mass_flow']                                  # Should contain relevant control columns
-# U_columns = ['Indoor_CO2_zn0']
+U_columns = ['air_loop_fan_mass_flow']                          # Should contain relevant control columns
 Y_columns = X_columns                                           # Assuming the same state variables are treated as outputs
 
 # Convert to numpy arrays
@@ -44,22 +41,23 @@ U = df[U_columns].values    #Control actions - inputs
 Y = df[Y_columns].values    # Can be the same as the state - Output
 
 def extract_columns(df):
-    X = df[X_columns].values    # State variables (temperature, CO2 levels)
-    U = df[U_columns].values    # Control inputs (fan mass flow rate)
-    Y = df[Y_columns].values    # Outputs (in this case, same as states)
+    X = df[X_columns].values    
+    U = df[U_columns].values    
+    Y = df[Y_columns].values    
     return X, U, Y
 
 X1, U1, Y1 = extract_columns(df)
 X2, U2, Y2 = extract_columns(df2)
 X3, U3, Y3 = extract_columns(df3)
-# Split into train, dev, test (assume 70/15/15 split)
+
 nsim = X.shape[0]
 
 nsteps = 50   # number of prediction horizon steps in the loss function
 bs = 100      # minibatching batch size
+nsim = 2000   # number of simulation steps in the dataset
 
 
-
+#Split the data into train, dev, test (assume 50/25/25 split)
 def split_data(X, U, Y):
     train_size = X.shape[0] // 2
     dev_size = X.shape[0] // 4
@@ -94,10 +92,10 @@ devY = np.concatenate([devY1, devY2, devY3], axis=0)
 testX = np.concatenate([testX1, testX2, testX3], axis=0)
 testU = np.concatenate([testU1, testU2, testU3], axis=0)
 testY = np.concatenate([testY1, testY2, testY3], axis=0)
-nsim = 2000   # number of simulation steps in the dataset
 
-nx = trainX.shape[1] 
-nu = trainU.shape[1]  
+
+nx = trainX.shape[1]                                        # Number of states in the model (nx)
+nu = trainU.shape[1]                                        # Number of inputs in the model (nu)
 
 length_train = (trainX.shape[0]//nsteps) * nsteps
 length_dev = (devX.shape[0]//nsteps) * nsteps
@@ -215,20 +213,18 @@ if os.path.exists('nssm_model_node.pth'):
 else:
     nssm_node = model_loading()
     print("Skipping model loading as 'nssm_model_node.pth' is not available.")
-# construct NSSM model in Neuromancer
-# ssm = SSM(A, B, nx, nu)
-# ssm = SSM()
 
-# # create symbolic system model in Neuromancer
-# nssm_node = Node(ssm, ['xn', 'U'], ['xn'], name='NSSM')
 dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
 
 
 # visualize the system
-# dynamics_model.show()
+# dynamics_model.show()                 #Cannot get this to work on my computer. Gives error everytime
+
+dynamics_model.nstep_key = 'U'
 
 # %% Constraints + losses:
 x = variable("X")
+u = variable("U")
 xhat = variable('xn')[:, :-1, :]
 
 # trajectory tracking loss
@@ -239,8 +235,6 @@ reference_loss.name = "ref_loss"
 onestep_loss = 1.*(xhat[:, 1, :] == x[:, 1, :])^2
 onestep_loss.name = "onestep_loss"
 
-# plot computational graph
-# # problem.show()
 
 
 ################ Cost function ###################
@@ -248,40 +242,31 @@ setpoint_temperature = 20
 target_co2 = 600
 cost_per_kwh = 1.15
 
-electricity_consumption_kwh = torch.sum(X[:, :, 4] * 0.001 / 3600)
-electricity_cost = cost_per_kwh * electricity_consumption_kwh
+electricity_consumption_kwh = torch.sum(x[:, :, 4] * 0.001 / 3600)
 
-print(f'Electricity consumption (kWh): {electricity_consumption_kwh.item()}')
-print(f'Electricity cost (DKK): {electricity_cost.item()}')
-electricity_cost_array = torch.tensor([1.10, 1.15, 1.12, ...])
-electricity_cost = torch.sum(electricity_cost_array * (X[:, :, 4] * 0.001 / 3600))
-# electricity_cost = cost_per_kwh * torch.sum(X[:, :, 4])
+# print(f'Electricity consumption (kWh): {electricity_consumption_kwh.item()}')
 
 # electricity_cost_array = torch.tensor([1.10, 1.15, 1.12, ...])
+electricity_cost = cost_per_kwh * electricity_consumption_kwh
 
 
-# electricity_cost = torch.sum(electricity_cost_array * X[:, :, 4]) 
-
-# electricity_consumption_cost = 3.0 * torch.sum(X[:, :, 2])
-
-
-fan_speed_cost = 1.0 * torch.sum(U ** 2)  # Penalise higher fan speeds
-print(f'Fan speed cost: {fan_speed_cost.item()}') 
-temperature_deviation_cost = 5.0 * torch.sum((X[:, :, 0] - setpoint_temperature) ** 2)  # Penalise deviation from temperature setpoint
-print(f'Temperature deviation cost: {temperature_deviation_cost.item()}')
-co2_cost = 2.0 * torch.sum((X[:, :, 1] - target_co2) ** 2)
-print(f'CO2 deviation cost: {co2_cost.item()}')
+fan_speed_cost = 1.0 * torch.sum(u ** 2)  # Penalise higher fan speeds
+# print(f'Fan speed cost: {fan_speed_cost.item()}') 
+temperature_deviation_cost = 5.0 * torch.sum((x[:, :, 0] - setpoint_temperature) ** 2)  # Penalise deviation from temperature setpoint
+# print(f'Temperature deviation cost: {temperature_deviation_cost.item()}')
+co2_cost = 2.0 * torch.sum((x[:, :, 2] - target_co2) ** 2)
+# print(f'CO2 deviation cost: {co2_cost.item()}')
 
 
-electricity_consumption_cost = 3.0 * torch.sum(X[:, :, 2])  
-electricity_cost = cost_per_kwh * torch.sum(X[:, :, 2])
+electricity_consumption_cost = 3.0 * torch.sum(x[:, :, 2])  
+electricity_cost = cost_per_kwh * torch.sum(x[:, :, 2])
 
 total_cost = fan_speed_cost + temperature_deviation_cost + co2_cost + electricity_cost
 total_cost.name = "total_cost"
-print(f'Total cost: {total_cost.item()}')
+
 # aggregate list of objective terms and constraints
 objectives = [reference_loss, onestep_loss, 
-             total_cost
+            #  total_cost
               ]
 constraints = []
 # create constrained optimization loss
@@ -326,8 +311,7 @@ for i in range(iterations):
     # Reset early stopping counter if needed
     trainer.badcount = 0         # early stopping - if needed
 
-# test_data['nx'] = test_data['nx'][:1].reshape(1, 1, 6)
-# test_data['U'] = test_data['U'][:1].reshape(1, 50, 1)
+print(test_data.keys())
 
 
 torch.save(nssm_node.state_dict(), 'nssm_model_node.pth') 
@@ -347,6 +331,8 @@ input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
 pred_traj, true_traj = pred_traj.transpose(1, 0), true_traj.transpose(1, 0)
 
 
+test_data['xn'] = test_data['xn'][:1].reshape(1, 1, 6)
+test_data['U'] = test_data['U'][:1].reshape(1, 50, 1)
 
 
 # plot rollout
@@ -374,28 +360,28 @@ plt.tight_layout()
 
 
 ### Evaluation of model
-rmse = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-print(f'RMSE: {rmse}')
+# rmse = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
+# print(f'RMSE: {rmse}')
 
-mae = mean_absolute_error(true_traj.flatten(), pred_traj.flatten())
-print(f'MAE: {mae}')
+# mae = mean_absolute_error(true_traj.flatten(), pred_traj.flatten())
+# print(f'MAE: {mae}')
 
-r2 = r2_score(true_traj.flatten(), pred_traj.flatten())
-print(f'R² score: {r2}')
+# r2 = r2_score(true_traj.flatten(), pred_traj.flatten())
+# print(f'R² score: {r2}')
 
-rmse_states = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-rmse_inputs = np.sqrt(mean_squared_error(test_data['U'].detach().numpy().flatten(), input_traj.flatten()))
+# rmse_states = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
+# rmse_inputs = np.sqrt(mean_squared_error(test_data['U'].detach().numpy().flatten(), input_traj.flatten()))
 
-print(f'RMSE for States: {rmse_states}')
-print(f'RMSE for Inputs: {rmse_inputs}')
+# print(f'RMSE for States: {rmse_states}')
+# print(f'RMSE for Inputs: {rmse_inputs}')
 
 
 
-print(test_outputs['xn'])
+# print(test_outputs['xn'])
 print(f'Shape of the test data [xn]: {test_data["xn"].shape}')
-print(test_data['xn'])
+# print(test_data['xn'])
 print(f'Shape of the test data [U]: {test_data["U"].shape}')
-print(test_data['U'])
+# print(test_data['U'])
 
 plt.show()
 '''
