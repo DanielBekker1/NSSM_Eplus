@@ -1,3 +1,10 @@
+'''
+This script import data from three different simulations of the energyplus model. 
+The no_agent_baseline.py is used to run energyPlus model. The simulations contain different settings of the fan speed, (zero, half and full speed)
+First step is to preprocess the data into the right format, normalise and spilt the data into train dev and test group (0.5 / 0.25 / 0.25)
+The nssm model is build and trained on the data. The model is then validated on the test data.
+Thhe model is saved and imported to another file.
+'''
 import pandas as pd
 import numpy as np
 import torch
@@ -6,6 +13,7 @@ import os
 from neuromancer.psl import plot
 from neuromancer import psl
 import matplotlib.pyplot as plt
+import pickle
 from torch.utils.data import DataLoader
 
 from neuromancer.system import Node, System
@@ -16,7 +24,7 @@ from neuromancer.constraint import variable
 from neuromancer.loss import PenaltyLoss
 from neuromancer.modules import blocks
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+# from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 #Data loading and extractions of states (X), outputs (Y) and control inputs (U)
 
@@ -175,8 +183,22 @@ class SSM(nn.Module):
         self.in_features, self.out_features = nx+nu, nx
 
     def forward(self, x, u, d=None):
-       
-        # state space model
+        # Ensure both x and u have batch dimensions
+        if x.dim() == 1:
+            x = x.unsqueeze(0)
+        if u.dim() == 1:
+            u = u.unsqueeze(0)
+        
+        # Reshape x and u if needed to have the correct feature dimensions
+        if x.shape[-1] != self.nx or x.shape[1] != self.nx:
+            x = x.view(-1, self.nx)
+        if u.shape[-1] != self.nu or u.shape[1] != self.nu:
+            u = u.view(-1, self.nu)
+        
+        print("Shape of x end of forward function:", x.shape)       #Sgould be [batch_size, nx]
+        print("Shape of u end of forward function:", u.shape)  #Expect [batch_size, nu]
+        
+        # Compute the next state
         x = self.fx(x) + self.fu(u)
         return x
 
@@ -204,27 +226,17 @@ def model_loading():
     if os.path.exists('nssm_model_node.pth'):
         nssm_node.load_state_dict(torch.load('nssm_model_node.pth'))
         print("Model loaded successfully.")
-    else:
-        print("Model file not found. Skipping model loading.")
     return nssm_node
 
-if os.path.exists('nssm_model_node.pth'):
-    nssm_node = model_loading()
-else:
-    nssm_node = model_loading()
-    print("Skipping model loading as 'nssm_model_node.pth' is not available.")
+
+nssm_node = model_loading()
 
 dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
-
-
-# visualize the system
-# dynamics_model.show()                 #Cannot get this to work on my computer. Gives error everytime
-
 dynamics_model.nstep_key = 'U'
 
-# %% Constraints + losses:
+
+# %% losses:
 x = variable("X")
-u = variable("U")
 xhat = variable('xn')[:, :-1, :]
 
 # trajectory tracking loss
@@ -236,43 +248,11 @@ onestep_loss = 1.*(xhat[:, 1, :] == x[:, 1, :])^2
 onestep_loss.name = "onestep_loss"
 
 
-
-################ Cost function ###################
-setpoint_temperature = 20
-target_co2 = 600
-cost_per_kwh = 1.15
-
-electricity_consumption_kwh = torch.sum(x[:, :, 4] * 0.001 / 3600)
-
-# print(f'Electricity consumption (kWh): {electricity_consumption_kwh.item()}')
-
-# electricity_cost_array = torch.tensor([1.10, 1.15, 1.12, ...])
-electricity_cost = cost_per_kwh * electricity_consumption_kwh
-
-
-fan_speed_cost = 1.0 * torch.sum(u ** 2)  # Penalise higher fan speeds
-# print(f'Fan speed cost: {fan_speed_cost.item()}') 
-temperature_deviation_cost = 5.0 * torch.sum((x[:, :, 0] - setpoint_temperature) ** 2)  # Penalise deviation from temperature setpoint
-# print(f'Temperature deviation cost: {temperature_deviation_cost.item()}')
-co2_cost = 2.0 * torch.sum((x[:, :, 2] - target_co2) ** 2)
-# print(f'CO2 deviation cost: {co2_cost.item()}')
-
-
-electricity_consumption_cost = 3.0 * torch.sum(x[:, :, 2])  
-electricity_cost = cost_per_kwh * torch.sum(x[:, :, 2])
-
-total_cost = fan_speed_cost + temperature_deviation_cost + co2_cost + electricity_cost
-total_cost.name = "total_cost"
-
-# aggregate list of objective terms and constraints
-objectives = [reference_loss, onestep_loss, 
-            #  total_cost
-              ]
-constraints = []
-# create constrained optimization loss
-loss = PenaltyLoss(objectives, constraints)
+objectives = [reference_loss, onestep_loss]
+loss = PenaltyLoss(objectives, []) 
 # construct constrained optimization problem
 problem = Problem([dynamics_model], loss)
+# problem.show()
 
 
 def forward(self, x, u, d=None):
@@ -283,107 +263,60 @@ def forward(self, x, u, d=None):
 optimizer = torch.optim.Adam(problem.parameters(),
                              lr=0.006)
 #trainer
-trainer = Trainer(
-    problem,
-    train_loader,
-    dev_loader,
-    test_data,
-    optimizer,
-    patience=100,   #initial 100
-    warmup=100,     # Initial 100
-    epochs=1000,     # Initial 1000
-    eval_metric="dev_loss",
-    train_metric="train_loss",
-    dev_metric="dev_loss",
-    test_metric="dev_loss",
-)
 
+if __name__ == "__main__":
+    
+    trainer = Trainer(
+        problem,
+        train_loader,
+        dev_loader,
+        test_data,
+        optimizer,
+        patience=100,                          #initial 100
+        warmup=100,                            # Initial 100
+        epochs=1000,                           # Initial 1000
+        eval_metric="dev_loss",
+        train_metric="train_loss",
+        dev_metric="dev_loss",
+        test_metric="dev_loss",
+    )
 
-iterations = 1  # or any number of iterations
-#Recap of nsteps = 10 and bs = 100
-for i in range(iterations):
-    print(f'Training iteration {i+1} with nsteps = {nsteps}')
-
-    # Train the model
     best_model = trainer.train()
-    problem.load_state_dict(best_model)
+    torch.save(nssm_node.state_dict(), 'nssm_model_node.pth')
+    with open('test_data.pkl', 'wb') as f:
+        pickle.dump(test_data, f)
 
-    # Reset early stopping counter if needed
-    trainer.badcount = 0         # early stopping - if needed
+    test_outputs = dynamics_model(test_data)
+    pred_traj = test_outputs['xn'][:, :-1, :].detach().numpy().reshape(-1, nx)
+    true_traj = test_data['X'].detach().numpy().reshape(-1, nx)
+    input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
+    pred_traj, true_traj = pred_traj.transpose(1, 0), true_traj.transpose(1, 0)
 
-print(test_data.keys())
+    # plot rollout
+    figsize = 25
+    fig, ax = plt.subplots(nx + nu, figsize=(figsize, figsize))
+    labels = [f'$y_{k}$' for k in range(len(true_traj))]
+    for row, (t1, t2, label) in enumerate(zip(true_traj, pred_traj, labels)):
+        if nx > 1:
+            axe = ax[row]
+        else:
+            axe = ax
+        axe.set_ylabel(label, rotation=0, labelpad=20, fontsize=figsize)
+        axe.plot(t1, 'c', linewidth=4.0, label='True')
+        axe.plot(t2, 'm--', linewidth=4.0, label='Pred')
+        axe.tick_params(labelbottom=False, labelsize=figsize)
+    axe.tick_params(labelbottom=True, labelsize=figsize)
+    axe.legend(fontsize=figsize)
+    ax[-1].plot(input_traj, 'c', linewidth=4.0, label='inputs')
+    ax[-1].legend(fontsize=figsize)
+    ax[-1].set_xlabel('$time$', fontsize=figsize)
+    ax[-1].set_ylabel('$u$', rotation=0, labelpad=20, fontsize=figsize)
+    ax[-1].tick_params(labelbottom=True, labelsize=figsize)
+    plt.tight_layout()
 
-
-torch.save(nssm_node.state_dict(), 'nssm_model_node.pth') 
-
-
-"""## Parameter estimation results"""
-
-# update the rollout length based on the test data
-dynamics_model.nsteps = test_data['X'].shape[1]
-
-# Test set results
-test_outputs = dynamics_model(test_data)
-
-pred_traj = test_outputs['xn'][:, :-1, :].detach().numpy().reshape(-1, nx)
-true_traj = test_data['X'].detach().numpy().reshape(-1, nx)
-input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
-pred_traj, true_traj = pred_traj.transpose(1, 0), true_traj.transpose(1, 0)
-
-
-test_data['xn'] = test_data['xn'][:1].reshape(1, 1, 6)
-test_data['U'] = test_data['U'][:1].reshape(1, 50, 1)
-
-
-# plot rollout
-figsize = 10
-fig, ax = plt.subplots(nx + nu, figsize=(figsize, figsize))
-labels = [f'$y_{k}$' for k in range(len(true_traj))]
-for row, (t1, t2, label) in enumerate(zip(true_traj, pred_traj, labels)):
-    if nx > 1:
-        axe = ax[row]
-    else:
-        axe = ax
-    axe.set_ylabel(label, rotation=0, labelpad=20, fontsize=figsize)
-    axe.plot(t1, 'c', linewidth=4.0, label='True')
-    axe.plot(t2, 'm--', linewidth=4.0, label='Pred')
-    axe.tick_params(labelbottom=False, labelsize=figsize)
-axe.tick_params(labelbottom=True, labelsize=figsize)
-axe.legend(fontsize=figsize)
-ax[-1].plot(input_traj, 'c', linewidth=4.0, label='inputs')
-ax[-1].legend(fontsize=figsize)
-ax[-1].set_xlabel('$time$', fontsize=figsize)
-ax[-1].set_ylabel('$u$', rotation=0, labelpad=20, fontsize=figsize)
-ax[-1].tick_params(labelbottom=True, labelsize=figsize)
-plt.tight_layout()
+    plt.show()
 
 
-
-### Evaluation of model
-# rmse = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-# print(f'RMSE: {rmse}')
-
-# mae = mean_absolute_error(true_traj.flatten(), pred_traj.flatten())
-# print(f'MAE: {mae}')
-
-# r2 = r2_score(true_traj.flatten(), pred_traj.flatten())
-# print(f'R² score: {r2}')
-
-# rmse_states = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-# rmse_inputs = np.sqrt(mean_squared_error(test_data['U'].detach().numpy().flatten(), input_traj.flatten()))
-
-# print(f'RMSE for States: {rmse_states}')
-# print(f'RMSE for Inputs: {rmse_inputs}')
-
-
-
-# print(test_outputs['xn'])
-print(f'Shape of the test data [xn]: {test_data["xn"].shape}')
-# print(test_data['xn'])
-print(f'Shape of the test data [U]: {test_data["U"].shape}')
-# print(test_data['U'])
-
-plt.show()
 '''
 Add state co2 for rooms to control. Occupancy as a state. 
 Main fan speed as U.
