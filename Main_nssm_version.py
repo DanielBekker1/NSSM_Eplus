@@ -252,7 +252,7 @@ objectives = [reference_loss, onestep_loss]
 loss = PenaltyLoss(objectives, []) 
 # construct constrained optimization problem
 problem = Problem([dynamics_model], loss)
-# problem.show()
+#problem.show()
 
 
 def forward(self, x, u, d=None):
