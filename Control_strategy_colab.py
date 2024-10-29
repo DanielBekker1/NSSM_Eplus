@@ -38,7 +38,6 @@ from neuromancer.dataset import DictDataset
 
 with open('test_data.pkl', 'rb') as f:
     test_data = pickle.load(f)
-
 nssm_node = model_loading()
 
 
@@ -47,20 +46,15 @@ train_data = DictDataset({'X': test_data['X'], 'U': test_data['U']})
 train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
 dev_loader = DataLoader(train_data, batch_size=32)
 
-#Define the Variables
-
+#Define the Variables and system shapes
 u = variable("U")
 x = variable("X")
-xhat = variable('xn')[:, :-1, :]
-CO2 = variable('xn')[:, :-1, 2] 
-P_fan = variable('xn')[:, :-1, 4]
-temp_soft = variable('xn')[:, :-1, 0]
 
 nsteps = 50
 nx = test_data['X'].shape[2]                   #Number of states
 nu = test_data['U'].shape[2]                   #Number of inputs
 
-# Define constants 
+# Define constants and lists
 CO2_setpoint = 500                                  # Setpoint for CO2
 alpha = 0.1                                         # Weighting factor for energy consumption ??
 electricity_cost = np.array([602.79, 620.69, 611.67, 620.54, 639.86, 675.95, 780.95, 1025.33, 1205.73, 957.69, 
@@ -77,7 +71,6 @@ U = test_data['U'][:, :, 0]
 
 
 #Control policy 
-
 net = blocks.MLP_bounds(
     insize=nx,  # Size of system state 
     outsize=nu,  
@@ -96,8 +89,8 @@ def train_control_policy():
 
     cl_system.show()
 
-    print("Shape of X (system state):", test_data['X'].shape)
-    print("Shape of U (control input):", test_data['U'].shape)
+    print("Shape of X (system state) in start train_control_policy:", test_data['X'].shape)
+    print("Shape of U (control input) in start train_control policy:", test_data['U'].shape)
 
     # After defining cl_system, check its output shape
     test_outputs = cl_system(test_data)
@@ -106,7 +99,7 @@ def train_control_policy():
     # Add a forward hook to print input shapes in the policy network
     def print_input_shape(module, input, output):
         for key, value in input[0].items():
-            print(f"Input shape for {key} in {module}: {value.shape}")
+            print(f"Input shape for key '{key}' in {module}: {value.shape}")
 
     policy.register_forward_hook(print_input_shape)
 
@@ -130,7 +123,6 @@ def train_control_policy():
     obj_2 = energy_loss.minimize()
     obj_2.name = 'Energy_loss'
 
-    
     objectives = [obj_1, obj_2]
 
     # Define the constrains
@@ -152,20 +144,18 @@ def train_control_policy():
     T_max_constraint = (temp_soft <= T_max)
     T_max_constraint.name = 'Temp_Max'
 
-
     constraints = [U_min_constraint, U_max_constraint, 
                    CO2_min_constraint, CO2_max_constraint, 
                    T_min_constraint, T_max_constraint]
 
 
-    # create constrained optimization loss
+
     loss = PenaltyLoss(objectives, constraints)
-    # construct constrained optimization problem
     problem = Problem([cl_system], loss)
 
     for batch in train_loader:
-        print("Shape of X in batch:", batch['X'].shape)
-        print("Shape of U in batch:", batch['U'].shape)
+        print("Shape of X in batch in train_loader:", batch['X'].shape)
+        print("Shape of U in batch in train_loader:", batch['U'].shape)
         
     problem.show()
 
@@ -177,16 +167,13 @@ def train_control_policy():
     test_outputs = cl_system(test_data)
     print(test_outputs['xn'])
 
-    # import networkx as nx
-    # # Instead of problem.show()
-    # graph = problem.get_graph()  # Get the computational graph
-    # nx.write_gml(graph, "problem_graph.gml")  # Write the graph to a file (GML format)
+   
     for batch in train_loader:
         print("Shape of X in batch:", batch['X'].shape)
         print("Shape of U in batch:", batch['U'].shape)
 
     optimizer = torch.optim.AdamW(problem.parameters(), lr=0.001)
-    #  Neuromancer trainer
+
     trainer = Trainer(
         problem,
         train_loader,
@@ -202,9 +189,9 @@ def train_control_policy():
         
     )
 
-    # Train control policy
+    #Train control policy
     best_model = trainer.train()
-    # load best trained model
+    #load best trained model
     trainer.model.load_state_dict(best_model)
     torch.save(cl_system.state_dict(), 'cl_system.pth')
 
@@ -216,27 +203,4 @@ def train_control_policy():
 cl_system = train_control_policy()
 
 cl_system.show()
-### Evaluation of model
-# rmse = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-# print(f'RMSE: {rmse}')
-
-# mae = mean_absolute_error(true_traj.flatten(), pred_traj.flatten())
-# print(f'MAE: {mae}')
-
-# r2 = r2_score(true_traj.flatten(), pred_traj.flatten())
-# print(f'R² score: {r2}')
-
-# rmse_states = np.sqrt(mean_squared_error(true_traj.flatten(), pred_traj.flatten()))
-# rmse_inputs = np.sqrt(mean_squared_error(test_data['U'].detach().numpy().flatten(), input_traj.flatten()))
-
-# print(f'RMSE for States: {rmse_states}')
-# print(f'RMSE for Inputs: {rmse_inputs}')
-
-
-
-# print(test_outputs['xn'])
-# print(f'Shape of the test data [xn]: {test_data["xn"].shape}')
-# # print(test_data['xn'])
-# print(f'Shape of the test data [U]: {test_data["U"].shape}')
-# # print(test_data['U'])
 
