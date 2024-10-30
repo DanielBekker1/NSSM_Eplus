@@ -54,14 +54,15 @@ def load_training_data():
     The NSSM will need initial conditions 'xn' for each batch. 
     Therefore the shape of those tensors should be (batch_size, 1, nx) and (batch_size, nsteps, nu) respectively.
     Remember you need to divide the data properly, as it is now the train and dev data are the same.
-    You would also want to split the data into trai, dev and test data, where the test data you would use after training to evaluate the control policy.
+    You would also want to split the data into train, dev and test data, where the test data you would use after training to evaluate the control policy.
+    Tester
     """
 
 
     with open('test_data.pkl', 'rb') as f:
         test_data = pickle.load(f)
 
-    train_data = DictDataset({'x': test_data['X'], 'U': test_data['U']})
+    train_data = DictDataset({'xn': test_data['xn'], 'U': test_data['U']})
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     dev_loader = DataLoader(train_data, batch_size=32)
     
@@ -69,9 +70,6 @@ def load_training_data():
     nu = test_data['U'].shape[2]                   #Number of inputs
 
     return train_loader, dev_loader, nx, nu
-
-
-
 
 
 
