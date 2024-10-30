@@ -21,7 +21,7 @@ from neuromancer.trainer import Trainer
 from neuromancer.constraint import variable
 from neuromancer.loss import PenaltyLoss
 from Main_nssm_version import model_loading
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, random_split
 from neuromancer.dataset import DictDataset
 
 
@@ -37,9 +37,9 @@ def load_closed_loop_system(nx, nu, show=False):
         max=torch.tensor([[1.0]]),  # Fan speed maximum
     )
 
-    policy = Node(net, ['xn'], ['U'], name='control_policy')  # Control policy node
+    policy = Node(net, ["xn"], ["U"], name="control_policy")  # Control policy node
     nssm_node.freeze()
-    cl_system = System([policy, nssm_node], name='cl_system', nsteps=nsteps)
+    cl_system = System([policy, nssm_node], name="cl_system", nsteps=nsteps)
 
     if show:
         cl_system.show()
@@ -55,19 +55,27 @@ def load_training_data():
     Therefore the shape of those tensors should be (batch_size, 1, nx) and (batch_size, nsteps, nu) respectively.
     Remember you need to divide the data properly, as it is now the train and dev data are the same.
     You would also want to split the data into train, dev and test data, where the test data you would use after training to evaluate the control policy.
-    Tester
+ 
     """
 
 
-    with open('test_data.pkl', 'rb') as f:
+    with open("test_data.pkl", "rb") as f:
         test_data = pickle.load(f)
 
-    train_data = DictDataset({'xn': test_data['xn'], 'U': test_data['U']})
-    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
-    dev_loader = DataLoader(train_data, batch_size=32)
+    test_data["xn"] = test_data["xn"][:, :-1, :]
+    train_data = DictDataset({"xn": test_data["xn"], "U": test_data["U"]})
     
-    nx = test_data['X'].shape[2]                   #Number of states
-    nu = test_data['U'].shape[2]                   #Number of inputs
+
+    train_size = int((3/5) * len(train_data))
+    dev_size = test_size = int((1/5) * len(train_data))
+
+    CL_train_data, CL_dev_data, CL_test_data = random_split(train_data, [train_size, dev_size, test_size])
+    train_loader = DataLoader(CL_train_data, batch_size=32, shuffle=True)
+    dev_loader = DataLoader(CL_dev_data, batch_size=32)
+    test_loader = DataLoader(CL_test_data, batch_size=32)
+    
+    nx = test_data["X"].shape[2]                   #Number of states
+    nu = test_data["U"].shape[2]                   #Number of inputs
 
     return train_loader, dev_loader, nx, nu
 
@@ -84,10 +92,10 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     #Define the symbolic variables for the control policy
     u = variable("U")
     x = variable("xn")
-    xhat = variable('xn')[:, :-1, :]
-    CO2 = variable('xn')[:, :-1, 2] 
-    P_fan = variable('xn')[:, :-1, 4]
-    temp_soft = variable('xn')[:, :-1, 0]
+    xhat = variable("xn")[:, :-1, :]
+    CO2 = variable("xn")[:, :-1, 2] 
+    P_fan = variable("xn")[:, :-1, 4]
+    temp_soft = variable("xn")[:, :-1, 0]
     
     obj_1 = ((CO2 - CO2_setpoint)**2).minimize()
     obj_1.name = "CO2_loss"
@@ -140,10 +148,10 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
         patience=100,
         epochs=1000,
         warmup=100,
-        train_metric='train_loss',
-        eval_metric='dev_loss',
-        dev_metric='dev_loss',
-        test_metric='dev_loss'
+        train_metric="train_loss",
+        eval_metric="dev_loss",
+        dev_metric="dev_loss",
+        test_metric="dev_loss"
         
     )
 
@@ -151,7 +159,7 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     best_model = trainer.train()
     # load best trained model
     trainer.model.load_state_dict(best_model)
-    torch.save(cl_system.state_dict(), 'cl_system.pth')
+    torch.save(cl_system.state_dict(), "cl_system.pth")
 
     return cl_system
 

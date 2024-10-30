@@ -10,8 +10,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import os
-from neuromancer.psl import plot
-from neuromancer import psl
 import matplotlib.pyplot as plt
 import pickle
 from torch.utils.data import DataLoader
@@ -282,11 +280,14 @@ if __name__ == "__main__":
     )
 
     best_model = trainer.train()
+    test_outputs = dynamics_model(test_data)
+
+    test_data["xn"] = test_outputs["xn"]                #Update the states to the predicted states by NSSM
     torch.save(nssm_node.state_dict(), 'nssm_model_node.pth')
     with open('test_data.pkl', 'wb') as f:
         pickle.dump(test_data, f)
 
-    test_outputs = dynamics_model(test_data)
+    # test_outputs = dynamics_model(test_data)
     pred_traj = test_outputs['xn'][:, :-1, :].detach().numpy().reshape(-1, nx)
     true_traj = test_data['X'].detach().numpy().reshape(-1, nx)
     input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
