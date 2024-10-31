@@ -7,7 +7,6 @@ Integrate the cost function and constraints.
 Solve the control problem at each timestep.
 Graphviz is needed in system PATH to run the simulation. Important with problem.show()
 '''
-
 import numpy as np
 import torch
 import pickle

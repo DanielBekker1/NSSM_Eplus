@@ -317,7 +317,6 @@ if __name__ == "__main__":
 
     plt.show()
 
-
 '''
 Add state co2 for rooms to control. Occupancy as a state. 
 Main fan speed as U.
