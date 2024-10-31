@@ -49,13 +49,16 @@ def load_closed_loop_system(nx, nu, show=False):
 def load_training_data():
 
     """
-    You want to reformulate the way you're creating the training data.
-    You should have a train_loader with the keys 'xn' and 'U' (X is not needed, the policy should use only the estimates from the NSSM)
-    The NSSM will need initial conditions 'xn' for each batch. 
-    Therefore the shape of those tensors should be (batch_size, 1, nx) and (batch_size, nsteps, nu) respectively.
-    Remember you need to divide the data properly, as it is now the train and dev data are the same.
-    You would also want to split the data into train, dev and test data, where the test data you would use after training to evaluate the control policy.
- 
+    31/10/2024: Only two more comments: The DictDataset object should be created after the split (you want to create 3 of them)
+    They should contain the "name" argument to avoid the KeyError you were having, it is specific to the neuromancer library.
+
+    A random split is not a good idea since the data is sequential. 
+    You should split the data in a way that the train data is before the dev data and the dev data is before the test data.
+    Load the data and split it into train, dev and test sets.
+    Then create the dict datasets and dataloaders for each set. With a name for each DictDataset.
+
+    You can check the "Learning to stabilize a linear dynamical system." notebook for a similar example, not exactly the same but similar.
+
     """
 
 
@@ -63,7 +66,7 @@ def load_training_data():
         test_data = pickle.load(f)
 
     test_data["xn"] = test_data["xn"][:, :-1, :]
-    train_data = DictDataset({"xn": test_data["xn"], "U": test_data["U"]})
+    train_data = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="train_data") # The name argument is important
     
 
     train_size = int((3/5) * len(train_data))
