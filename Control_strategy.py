@@ -65,23 +65,29 @@ def load_training_data():
         test_data = pickle.load(f)
 
     test_data["xn"] = test_data["xn"][:, :-1, :]
-    train_data = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="train_data") # The name argument is important
+    CL_dataset = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="CL dataset") # The name argument is important
     
+    # Splitting the data into train, dev and test. 60% train, 20 % for dev and test.
+    train_size = int((3/5) * len(CL_dataset))
+    dev_size = test_size = int((1/5) * len(CL_dataset))
 
-    train_size = int((3/5) * len(train_data))
-    dev_size = test_size = int((1/5) * len(train_data))
+    #squential split of the CL data.
+    CL_train_data = CL_dataset[:train_size]
+    CL_dev_data = CL_dataset[train_size:train_size + dev_size]
+    CL_test_data = CL_dataset[train_size + dev_size:train_size + dev_size + test_size]
 
-    CL_train_data, CL_dev_data, CL_test_data = random_split(train_data, [train_size, dev_size, test_size])
-    train_loader = DataLoader(CL_train_data, batch_size=32, shuffle=True)
-    dev_loader = DataLoader(CL_dev_data, batch_size=32)
-    test_loader = DataLoader(CL_test_data, batch_size=32)
-    
+    CL_train_dataset = DictDataset(CL_train_data, name="Train_data")
+    CL_dev_dataset = DictDataset(CL_dev_data, name="Dev_data")
+    CL_test_dataset = DictDataset(CL_test_data, name="Test_data")
+
+    train_loader = DataLoader(CL_train_dataset, batch_size=32, shuffle=True)
+    dev_loader = DataLoader(CL_dev_dataset, batch_size=32)
+    test_loader = DataLoader(CL_test_dataset, batch_size=32)
+   
     nx = test_data["X"].shape[2]                   #Number of states
     nu = test_data["U"].shape[2]                   #Number of inputs
 
     return train_loader, dev_loader, nx, nu
-
-
 
 
 def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, show=False):
