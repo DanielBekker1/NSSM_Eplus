@@ -30,15 +30,16 @@ def load_closed_loop_system(nx, nu, show=False):
     net = blocks.MLP_bounds(
         insize=nx, 
         outsize=nu,  
-        hsizes=[18, 18, 18],                
+        hsizes=[64, 64, 64],                
         nonlin=nn.GELU,  
-        min=torch.tensor([[0.0]]),  # Fan speed minimum
-        max=torch.tensor([[1.0]]),  # Fan speed maximum
+        min=0,  # Fan speed minimum
+        max=1,  # Fan speed maximum
     )
 
     policy = Node(net, ["xn"], ["U"], name="control_policy")  # Control policy node
     nssm_node.freeze()
     cl_system = System([policy, nssm_node], name="cl_system", nsteps=nsteps)
+    cl_system.nstep_key = "U"
 
     if show:
         cl_system.show()
@@ -50,8 +51,8 @@ def load_training_data():
     with open("test_data.pkl", "rb") as f:
         test_data = pickle.load(f)
 
-    test_data["xn"] = test_data["xn"][:, :-1, :]
-    CL_dataset = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="CL dataset") # The name argument is important
+    test_data["xn"] = test_data["xn"][:, 0:1, :]
+    CL_dataset = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="CL_dataset") # The name argument is important
     
     # Splitting the data into train, dev and test. 60% train, 20 % for dev and test.
     train_size = int((3/5) * len(CL_dataset))
@@ -62,13 +63,13 @@ def load_training_data():
     CL_dev_data = CL_dataset[train_size:train_size + dev_size]
     CL_test_data = CL_dataset[train_size + dev_size:train_size + dev_size + test_size]
 
-    CL_train_dataset = DictDataset(CL_train_data, name="Train_data")
-    CL_dev_dataset = DictDataset(CL_dev_data, name="Dev_data")
-    CL_test_dataset = DictDataset(CL_test_data, name="Test_data")
+    CL_train_dataset = DictDataset(CL_train_data, name='train')
+    CL_dev_dataset = DictDataset(CL_dev_data, name='dev')
+    CL_test_dataset = DictDataset(CL_test_data, name= 'test')
 
-    train_loader = DataLoader(CL_train_dataset, batch_size=18, shuffle=True)
-    dev_loader = DataLoader(CL_dev_dataset, batch_size=6)
-    test_loader = DataLoader(CL_test_dataset, batch_size=6)
+    train_loader = DataLoader(CL_train_dataset, collate_fn=CL_train_dataset.collate_fn, batch_size=32, shuffle=True)
+    dev_loader = DataLoader(CL_dev_dataset, collate_fn=CL_dev_dataset.collate_fn, batch_size=32)
+    test_loader = DataLoader(CL_test_dataset, collate_fn=CL_test_dataset.collate_fn, batch_size=32)
    
     nx = test_data["X"].shape[2]                   #Number of states
     nu = test_data["U"].shape[2]                   #Number of inputs
@@ -160,11 +161,10 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
         patience=100,
         epochs=1000,
         warmup=100,
-        train_metric="train_loss",
         eval_metric="dev_loss",
+        train_metric="train_loss",
         dev_metric="dev_loss",
-        # test_metric="dev_loss"
-        
+        test_metric="dev_loss",
     )
 
     # Train control policy
@@ -174,6 +174,12 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     torch.save(cl_system.state_dict(), "cl_system.pth")
 
     problem.load_state_dict(best_model)
+
+    """
+    You also need to reformulate the data to be in the same format as the training data.
+    There is no "X" in the test data.
+    """
+
     data = {'X': torch.ones(1, 1, nx, dtype=torch.float32)}
     # nsteps = 50
     cl_system.nsteps = nsteps

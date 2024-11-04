@@ -229,10 +229,10 @@ def model_loading():
         nssm_node.load_state_dict(torch.load('nssm_model_node.pth'), strict=False)
         print("Model loaded successfully.")
     
-    dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
-    dynamics_model.nstep_key = 'U'
+    #dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
+    #dynamics_model.nstep_key = 'U'
     
-    return dynamics_model
+    return nssm_node
 
 
 # nssm_node = model_loading()
