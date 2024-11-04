@@ -181,6 +181,7 @@ def normalise_data(trainX, trainU, devX, devU, testX, testU, nx, nu, length_trai
             devX, devU, dev_data, dev_loader,
             testX, testU, test_data)
 
+
 trainX, trainU, train_data, train_loader, devX, devU, dev_data, dev_loader, testX, testU, test_data = normalise_data(trainX, trainU, devX, devU, testX, testU, 
                                                                                                                      nx, nu, length_train, length_dev, length_test, 
                                                                                                                      nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u)
@@ -194,36 +195,38 @@ class SSM(nn.Module):
         self.fx, self.fu = fx, fu
         self.nx, self.nu = nx, nu
         self.in_features, self.out_features = nx+nu, nx
+        
 
     def forward(self, x, u, d=None):
-        # print("Shape of x end of forward function:", x.shape)       #Sgould be [batch_size, nx]
-        # print("Shape of u end of forward function:", u.shape)  #Expect [batch_size, nu]
         
-        # Compute the next state
         x = self.fx(x) + self.fu(u)
+
         return x
 
+    
 # # instantiate neural nets
 # Models how the state (x) evovles over time
 
-def create_ssm_model(nx, nu, hidden_sizes=[60, 60, 60]):
     # Define the state evolution model
-    A = blocks.MLP(nx, nx, bias=True, linear_map=torch.nn.Linear, nonlin=torch.nn.ReLU, hsizes=hidden_sizes)    #Bias is intial True
+A = blocks.MLP(nx, nx, bias=True,          #Bias is intial True
+                 linear_map=torch.nn.Linear,
+                 nonlin=torch.nn.ReLU,
+                 hsizes=[18, 18, 18])
 
-    # Define the control input model
-    B = blocks.MLP(nu, nx, bias=True, linear_map=torch.nn.Linear, nonlin=torch.nn.ReLU, hsizes=hidden_sizes)    #Bias is intial True
+#models how the control input (u) affect the states
+B = blocks.MLP(nu, nx, bias=True,          #Bias is intial True
+                linear_map=torch.nn.Linear,
+                nonlin=torch.nn.ReLU,
+                hsizes=[18, 18, 18])
 
-    # Create SSM structure
+
+def model_loading():
     ssm = SSM(A, B, nx, nu)
-    return ssm
-
-
-def model_loading(ssm):
     # create symbolic system model in Neuromancer
     nssm_node = Node(ssm, ['xn', 'U'], ['xn'], name='NSSM')
 
     if os.path.exists('nssm_model_node.pth'):
-        nssm_node.load_state_dict(torch.load('nssm_model_node.pth'))
+        nssm_node.load_state_dict(torch.load('nssm_model_node.pth'), strict=False)
         print("Model loaded successfully.")
     
     dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
@@ -237,6 +240,7 @@ def model_loading(ssm):
 def loss_func_and_problem(nx, dynamics_model):
     x = variable("X")
     xhat = variable('xn')[:, :-1, :]
+
 
     # trajectory tracking loss
     reference_loss = 10.*(xhat == x)^2
@@ -259,6 +263,8 @@ def setup_optimizer(problem):
 
 #Training of NSSM
 def train_nssm(problem, train_loader, dev_loader, test_data, optimizer):
+
+
     trainer = Trainer(
         problem,
         train_loader,
@@ -273,6 +279,8 @@ def train_nssm(problem, train_loader, dev_loader, test_data, optimizer):
         dev_metric="dev_loss",
         test_metric="dev_loss",
     )
+
+
     return trainer.train()
 
 #Saving of NSSM model and test_data
@@ -285,6 +293,7 @@ def save_model_and_data(nssm_node, test_data, model_path='nssm_model_node.pth', 
 def predict_trajectories(dynamics_model, test_data):
     test_outputs = dynamics_model(test_data)
     test_data["xn"] = test_outputs["xn"]
+
     return test_data, test_outputs
 
 def plot_results(test_data, test_outputs, nx, nu, figsize=25):
@@ -316,8 +325,7 @@ if __name__ == "__main__":
     trainX, trainU, devX, devU, testX, testU, nx, nu, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u = Data_Preparation()
 
     #Model creation and loading
-    ssm = create_ssm_model(nx, nu)
-    dynamics_model = model_loading(ssm)
+    dynamics_model = model_loading()
 
     #Loss function and problem setup
     problem = loss_func_and_problem(nx, dynamics_model)

@@ -20,9 +20,9 @@ from neuromancer.trainer import Trainer
 from neuromancer.constraint import variable
 from neuromancer.loss import PenaltyLoss
 from Main_nssm_version import model_loading
-from torch.utils.data import DataLoader, TensorDataset, random_split
+from torch.utils.data import DataLoader
 from neuromancer.dataset import DictDataset
-
+from neuromancer.plot import pltCL, pltPhase
 
 def load_closed_loop_system(nx, nu, show=False):
 
@@ -30,7 +30,7 @@ def load_closed_loop_system(nx, nu, show=False):
     net = blocks.MLP_bounds(
         insize=nx, 
         outsize=nu,  
-        hsizes=[32, 32],                
+        hsizes=[18, 18, 18],                
         nonlin=nn.GELU,  
         min=torch.tensor([[0.0]]),  # Fan speed minimum
         max=torch.tensor([[1.0]]),  # Fan speed maximum
@@ -46,20 +46,6 @@ def load_closed_loop_system(nx, nu, show=False):
     return cl_system
 
 def load_training_data():
-
-    """
-    31/10/2024: Only two more comments: The DictDataset object should be created after the split (you want to create 3 of them)
-    They should contain the "name" argument to avoid the KeyError you were having, it is specific to the neuromancer library.
-
-    A random split is not a good idea since the data is sequential. 
-    You should split the data in a way that the train data is before the dev data and the dev data is before the test data.
-    Load the data and split it into train, dev and test sets.
-    Then create the dict datasets and dataloaders for each set. With a name for each DictDataset.
-
-    You can check the "Learning to stabilize a linear dynamical system." notebook for a similar example, not exactly the same but similar.
-
-    """
-
 
     with open("test_data.pkl", "rb") as f:
         test_data = pickle.load(f)
@@ -80,9 +66,9 @@ def load_training_data():
     CL_dev_dataset = DictDataset(CL_dev_data, name="Dev_data")
     CL_test_dataset = DictDataset(CL_test_data, name="Test_data")
 
-    train_loader = DataLoader(CL_train_dataset, batch_size=32, shuffle=True)
-    dev_loader = DataLoader(CL_dev_dataset, batch_size=32)
-    test_loader = DataLoader(CL_test_dataset, batch_size=32)
+    train_loader = DataLoader(CL_train_dataset, batch_size=18, shuffle=True)
+    dev_loader = DataLoader(CL_dev_dataset, batch_size=6)
+    test_loader = DataLoader(CL_test_dataset, batch_size=6)
    
     nx = test_data["X"].shape[2]                   #Number of states
     nu = test_data["U"].shape[2]                   #Number of inputs
@@ -90,17 +76,29 @@ def load_training_data():
     return train_loader, dev_loader, nx, nu
 
 
-def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, show=False):
+def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, show=True):
 
     '''
     Below the cost function, constrains and optimisation of problem
     '''
+    for batch in train_loader:
+        
+    
+        x_tensor = batch["xn"]  # The states from the training data
+        u_tensor = batch["U"]   # The control inputs from the training data
+
+        # For CO2 and P_fan, you can select the relevant indices
+        CO2_tensor = x_tensor[:, :, 2]   # Assuming CO2 is the third variable in `xn`
+        P_fan_tensor = x_tensor[:, :, 4] # Assuming P_fan is the fifth variable in `xn`
+
+
+        # Break after the first batch to avoid printing multiple times
+        break
     ############### Cost function ###################
     # cost_function = (CO2 - CO2_setpoint)**2 + alpha * P_fan * (electricity_cost[0] / 1000)  # Only using first electricity cost value for now
     #Define the symbolic variables for the control policy
+
     u = variable("U")
-    x = variable("xn")
-    xhat = variable("xn")[:, :-1, :]
     CO2 = variable("xn")[:, :-1, 2] 
     P_fan = variable("xn")[:, :-1, 4]
     temp_soft = variable("xn")[:, :-1, 0]
@@ -147,6 +145,12 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
 
     cl_system.nsteps = nsteps # Coming from the constant set in the main block
 
+    for batch in train_loader:
+        print(f"Batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
+        break
+
+ 
+
     optimizer = torch.optim.AdamW(problem.parameters(), lr=0.001)
     trainer = Trainer(
         problem,
@@ -159,7 +163,7 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
         train_metric="train_loss",
         eval_metric="dev_loss",
         dev_metric="dev_loss",
-        test_metric="dev_loss"
+        # test_metric="dev_loss"
         
     )
 
@@ -169,6 +173,14 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     trainer.model.load_state_dict(best_model)
     torch.save(cl_system.state_dict(), "cl_system.pth")
 
+    problem.load_state_dict(best_model)
+    data = {'X': torch.ones(1, 1, nx, dtype=torch.float32)}
+    # nsteps = 50
+    cl_system.nsteps = nsteps
+    trajectories = cl_system(data)
+    pltCL(Y=trajectories['X'].detach().reshape(nsteps+1, 2), U=trajectories['U'].detach().reshape(nsteps, 1), figname='cl.png')
+    pltPhase(X=trajectories['X'].detach().reshape(nsteps+1, 2), figname='phase.png')
+    plt.show()
     return cl_system
 
 if __name__ == '__main__':
@@ -190,6 +202,5 @@ if __name__ == '__main__':
     train_loader, dev_loader, nx, nu = load_training_data()
     cl_system = load_closed_loop_system(nx , nu, show=True)
     cl_system = train_control_policy(cl_system=cl_system, nsteps=nsteps, train_loader=train_loader, dev_loader=dev_loader, show=True)
-
 
 
