@@ -40,12 +40,16 @@ def load_closed_loop_system(nx, nu, show=False):
     nssm_node.freeze()
     cl_system = System([policy, nssm_node], name="cl_system", nsteps=nsteps)
 
+    print(f"Control policy network first layer input size (should be {nx}): {net.linear[0].in_features}")
+    print(f"Control policy network last layer output size (should be {nu}): {net.linear[-1].out_features}")
+ 
     if show:
         cl_system.show()
 
     return cl_system
 
 def load_training_data():
+
 
     with open("test_data.pkl", "rb") as f:
         test_data = pickle.load(f)
@@ -67,8 +71,8 @@ def load_training_data():
     CL_test_dataset = DictDataset(CL_test_data, name="Test_data")
 
     train_loader = DataLoader(CL_train_dataset, batch_size=18, shuffle=True)
-    dev_loader = DataLoader(CL_dev_dataset, batch_size=6)
-    test_loader = DataLoader(CL_test_dataset, batch_size=6)
+    dev_loader = DataLoader(CL_dev_dataset, batch_size=18)
+    test_loader = DataLoader(CL_test_dataset, batch_size=18)
    
     nx = test_data["X"].shape[2]                   #Number of states
     nu = test_data["U"].shape[2]                   #Number of inputs
@@ -82,15 +86,21 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     Below the cost function, constrains and optimisation of problem
     '''
     for batch in train_loader:
+        print(f"Train batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
         
     
         x_tensor = batch["xn"]  # The states from the training data
         u_tensor = batch["U"]   # The control inputs from the training data
 
+        print("Shape of x_tensor (batch['xn']):", x_tensor.shape)  # Expected shape [batch_size, nsteps, nx]
+        print("Shape of u_tensor (batch['U']):", u_tensor.shape)   # Expected shape [batch_size, nsteps, nu]
+
         # For CO2 and P_fan, you can select the relevant indices
         CO2_tensor = x_tensor[:, :, 2]   # Assuming CO2 is the third variable in `xn`
         P_fan_tensor = x_tensor[:, :, 4] # Assuming P_fan is the fifth variable in `xn`
 
+        print("Shape of CO2_tensor:", CO2_tensor.shape)  # Expected shape [batch_size, nsteps]
+        print("Shape of P_fan_tensor:", P_fan_tensor.shape)  # Expected shape [batch_size, nsteps]
 
         # Break after the first batch to avoid printing multiple times
         break
@@ -99,6 +109,8 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     #Define the symbolic variables for the control policy
 
     u = variable("U")
+    x = variable("xn")
+    xhat = variable("xn")[:, :-1, :]
     CO2 = variable("xn")[:, :-1, 2] 
     P_fan = variable("xn")[:, :-1, 4]
     temp_soft = variable("xn")[:, :-1, 0]
@@ -149,7 +161,11 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
         print(f"Batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
         break
 
- 
+    # Check shapes in train_control_policy
+    print(f"Shape of x in batch (before forward): {batch['xn'].shape}")  # Expect [batch_size, sequence_length, nx]
+    print(f"Shape of u in batch (before forward): {batch['U'].shape}")   # Expect [batch_size, sequence_length, nu]
+    print(f"Expected nx: {nx}, Expected nu: {nu}")
+
 
     optimizer = torch.optim.AdamW(problem.parameters(), lr=0.001)
     trainer = Trainer(

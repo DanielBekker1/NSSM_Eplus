@@ -84,6 +84,10 @@ def split_data(X, U, Y):
     dev_size = X.shape[0] // 4
     test_size = X.shape[0] - train_size - dev_size
 
+    # train_size = int(0.6 * X.shape[0])
+    # dev_size = int(0.2 * X.shape[0])
+    # test_size = X.shape[0] - train_size - dev_size
+
     # Split states, inputs, and outputs into train, dev, test
     trainX, trainU, trainY = X[:train_size], U[:train_size], Y[:train_size]
     devX, devU, devY = X[train_size:train_size+dev_size], U[train_size:train_size+dev_size], Y[train_size:train_size+dev_size]
@@ -181,13 +185,25 @@ def normalise_data(trainX, trainU, devX, devU, testX, testU, nx, nu, length_trai
             devX, devU, dev_data, dev_loader,
             testX, testU, test_data)
 
+print("Shape of trainX after normalisation:", trainX.shape)
+print("Shape of trainU after normalisation:", trainU.shape)
+print("Shape of devX after normalisation:", devX.shape)
+print("Shape of devU after normalisation:", devU.shape)
+print("Shape of testX after normalisation:", testX.shape)
+print("Shape of testU after normalisation:", testU.shape)
 
 trainX, trainU, train_data, train_loader, devX, devU, dev_data, dev_loader, testX, testU, test_data = normalise_data(trainX, trainU, devX, devU, testX, testU, 
                                                                                                                      nx, nu, length_train, length_dev, length_test, 
                                                                                                                      nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u)
 
-
+print("Shape of trainX after normalisation:", trainX.shape)
+print("Shape of trainU after normalisation:", trainU.shape)
+print("Shape of devX after normalisation:", devX.shape)
+print("Shape of devU after normalisation:", devU.shape)
+print("Shape of testX after normalisation:", testX.shape)
+print("Shape of testU after normalisation:", testU.shape)
 #Creation of NSSM structure
+
 class SSM(nn.Module):
 
     def __init__(self, fx, fu, nx, nu):
@@ -199,9 +215,13 @@ class SSM(nn.Module):
 
     def forward(self, x, u, d=None):
         
-        x = self.fx(x) + self.fu(u)
+        print("Shape of x at start of forward:", x.shape)  # Should match input to fx
+        print("Shape of u at start of forward:", u.shape)
+        # Compute the next state
+        x_next = self.fx(x) + self.fu(u)
+        print("Shape of x_next (end of forward function):", x_next.shape)  # Expecting [batch_size, 1, nx]
 
-        return x
+        return x_next
 
     
 # # instantiate neural nets
@@ -238,6 +258,7 @@ def model_loading():
 # nssm_node = model_loading()
 
 def loss_func_and_problem(nx, dynamics_model):
+    print("Shape of test_data['X'] (reference trajectory):", test_data["X"].shape)
     x = variable("X")
     xhat = variable('xn')[:, :-1, :]
 
@@ -250,6 +271,8 @@ def loss_func_and_problem(nx, dynamics_model):
     onestep_loss = 1.*(xhat[:, 1, :] == x[:, 1, :])^2
     onestep_loss.name = "onestep_loss"
 
+    print("Reference loss objective:", reference_loss)
+    print("One-step loss objective:", onestep_loss)
     objectives = [reference_loss, onestep_loss]
     loss = PenaltyLoss(objectives, []) 
     # construct constrained optimization problem
@@ -263,7 +286,13 @@ def setup_optimizer(problem):
 
 #Training of NSSM
 def train_nssm(problem, train_loader, dev_loader, test_data, optimizer):
-
+    print(f"Type of train_loader: {type(train_loader)}")
+    print(f"Type of dev_loader: {type(dev_loader)}")
+    print(f"Type of test_data: {type(test_data)}")
+    print(f"Contents of test_data keys: {list(test_data.keys())}")
+    print(f"Type of test_data['X']: {type(test_data['X'])}")
+    print(f"Type of test_data['U']: {type(test_data['U'])}")
+    print(f"Type of test_data['xn']: {type(test_data['xn'])}")
 
     trainer = Trainer(
         problem,
@@ -293,7 +322,7 @@ def save_model_and_data(nssm_node, test_data, model_path='nssm_model_node.pth', 
 def predict_trajectories(dynamics_model, test_data):
     test_outputs = dynamics_model(test_data)
     test_data["xn"] = test_outputs["xn"]
-
+    print("Shape of xn (predicted states) from System forward pass:", test_outputs["xn"].shape)
     return test_data, test_outputs
 
 def plot_results(test_data, test_outputs, nx, nu, figsize=25):
