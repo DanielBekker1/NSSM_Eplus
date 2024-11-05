@@ -41,16 +41,12 @@ def load_closed_loop_system(nx, nu, show=False):
     cl_system = System([policy, nssm_node], name="cl_system", nsteps=nsteps)
     cl_system.nstep_key = "U"
 
-    print(f"Control policy network first layer input size (should be {nx}): {net.linear[0].in_features}")
-    print(f"Control policy network last layer output size (should be {nu}): {net.linear[-1].out_features}")
- 
-    if show:
-        cl_system.show()
+    # if show:
+    #     cl_system.show()
 
     return cl_system
 
 def load_training_data():
-
 
     with open("test_data.pkl", "rb") as f:
         test_data = pickle.load(f)
@@ -71,12 +67,18 @@ def load_training_data():
     CL_dev_dataset = DictDataset(CL_dev_data, name='dev')
     CL_test_dataset = DictDataset(CL_test_data, name= 'test')
 
-    train_loader = DataLoader(CL_train_dataset, collate_fn=CL_train_dataset.collate_fn, batch_size=32, shuffle=True)
-    dev_loader = DataLoader(CL_dev_dataset, collate_fn=CL_dev_dataset.collate_fn, batch_size=32)
-    test_loader = DataLoader(CL_test_dataset, collate_fn=CL_test_dataset.collate_fn, batch_size=32)
+    bs = 32
+
+    train_loader = DataLoader(CL_train_dataset, 
+                              collate_fn=CL_train_dataset.collate_fn, batch_size=bs, shuffle=False)
+    dev_loader = DataLoader(CL_dev_dataset, 
+                            collate_fn=CL_dev_dataset.collate_fn, batch_size=bs, shuffle=False)
+    test_loader = DataLoader(CL_test_dataset, 
+                             collate_fn=CL_test_dataset.collate_fn, batch_size=bs, shuffle=False)
    
     nx = test_data["X"].shape[2]                   #Number of states
     nu = test_data["U"].shape[2]                   #Number of inputs
+
 
     return train_loader, dev_loader, nx, nu
 
@@ -86,31 +88,26 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     '''
     Below the cost function, constrains and optimisation of problem
     '''
-    for batch in train_loader:
-        print(f"Train batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
-        
-    
-        x_tensor = batch["xn"]  # The states from the training data
-        u_tensor = batch["U"]   # The control inputs from the training data
-
-        print("Shape of x_tensor (batch['xn']):", x_tensor.shape)  # Expected shape [batch_size, nsteps, nx]
-        print("Shape of u_tensor (batch['U']):", u_tensor.shape)   # Expected shape [batch_size, nsteps, nu]
-
-        # For CO2 and P_fan, you can select the relevant indices
-        CO2_tensor = x_tensor[:, :, 2]   # Assuming CO2 is the third variable in `xn`
-        P_fan_tensor = x_tensor[:, :, 4] # Assuming P_fan is the fifth variable in `xn`
-
-        print("Shape of CO2_tensor:", CO2_tensor.shape)  # Expected shape [batch_size, nsteps]
-        print("Shape of P_fan_tensor:", P_fan_tensor.shape)  # Expected shape [batch_size, nsteps]
-
-        # Break after the first batch to avoid printing multiple times
-        break
     ############### Cost function ###################
     # cost_function = (CO2 - CO2_setpoint)**2 + alpha * P_fan * (electricity_cost[0] / 1000)  # Only using first electricity cost value for now
     #Define the symbolic variables for the control policy
 
+    for batch in train_loader:
+        print(f"Batch 'xn' shape (should be [batch_size, 1, nx]): {batch['xn'].shape}")
+        print(f"Batch 'U' shape: {batch['U'].shape}")
+        break  # Only print for the first batch to avoid clutter
+
+    for batch in train_loader:
+        x_tensor = batch["xn"]
+        u_tensor = batch["U"]
+        print("Shape of x_tensor (initial condition):", x_tensor.shape)  # Expected to be [batch_size, 1, nx]
+        print("Shape of u_tensor:", u_tensor.shape)  # Expected shape for control input
+
+        # (Assuming you run `cl_system` on `x_tensor` here, or later in the code)
+        break  # Only print for the first batch
+
     u = variable("U")
-    x = variable("xn")
+    xn = variable("xn")
     xhat = variable("xn")[:, :-1, :]
     CO2 = variable("xn")[:, :-1, 2] 
     P_fan = variable("xn")[:, :-1, 4]
@@ -153,19 +150,15 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     loss = PenaltyLoss(objectives, constraints)
     problem = Problem([cl_system], loss)
     
-    if show:
-        problem.show()
+    # if show:
+    #     problem.show()
 
     cl_system.nsteps = nsteps # Coming from the constant set in the main block
 
-    for batch in train_loader:
-        print(f"Batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
-        break
+    # for batch in train_loader:
+    #     print(f"Batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
+    #     break
 
-    # Check shapes in train_control_policy
-    print(f"Shape of x in batch (before forward): {batch['xn'].shape}")  # Expect [batch_size, sequence_length, nx]
-    print(f"Shape of u in batch (before forward): {batch['U'].shape}")   # Expect [batch_size, sequence_length, nu]
-    print(f"Expected nx: {nx}, Expected nu: {nu}")
 
 
     optimizer = torch.optim.AdamW(problem.parameters(), lr=0.001)
@@ -196,14 +189,69 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     There is no "X" in the test data.
     """
 
-    data = {'X': torch.ones(1, 1, nx, dtype=torch.float32)}
+    data = {'xn': torch.ones(1, 1, nx, dtype=torch.float32)}        #Changed from X to xn
     # nsteps = 50
     cl_system.nsteps = nsteps
     trajectories = cl_system(data)
-    pltCL(Y=trajectories['X'].detach().reshape(nsteps+1, 2), U=trajectories['U'].detach().reshape(nsteps, 1), figname='cl.png')
-    pltPhase(X=trajectories['X'].detach().reshape(nsteps+1, 2), figname='phase.png')
+    
+    print("Shape of trajectories['xn'] before reshape:", trajectories['xn'].shape)
+    print("Shape of trajectories['U'] before reshape:", trajectories['U'].shape)
+    print("Expected nsteps:", nsteps)
+    print("Expected nx:", nx)
+
+    pltCL(Y=trajectories['xn'][:, :, :2].detach().reshape(nsteps+1, 2), U=trajectories['U'].detach().reshape(nsteps, 1), figname='cl.png')    #Changed to xn
+    pltPhase(X=trajectories['xn'][:, :, :2].detach().reshape(nsteps+1, 2), figname='phase.png')
+    # plt.show()
+    return cl_system, trajectories
+
+
+def KPI_calculations(trajectories, CO2_setpoint, electricity_cost):
+
+   
+    CO2_trajectories = trajectories['xn'][:, :, 2].detach()
+
+    mae_CO2 = torch.mean(torch.abs(CO2_trajectories - CO2_setpoint))
+    rmse_CO2 = torch.sqrt(torch.mean((CO2_trajectories - CO2_setpoint) ** 2))
+
+    print(f"Mean Absolute Error (MAE) for CO2: {mae_CO2.item():.2f}")
+    print(f"Root Mean Square Error (RMSE) for CO2: {rmse_CO2.item():.2f}")
+    
+
+    P_fan_trajectories = trajectories['xn'][:, :, 4].detach()
+    electricity_cost_tensor = torch.tensor(electricity_cost, dtype=torch.float32)
+    fan_energy_cost = torch.sum(torch.mean(P_fan_trajectories, dim=1) * (electricity_cost_tensor / 1000))
+
+    print(f"Total Energy Cost for Fan Power (in DKK): {fan_energy_cost.item():.2f}")
+    
+    return mae_CO2.item(), rmse_CO2.item(), fan_energy_cost.item()
+
+def plots(CO2_trajectories, CO2_setpoint, P_fan_trajectories, electricity_cost):
+    plt.figure(figsize=(12, 12))
+
+    # CO₂ Concentration Over Time
+    plt.subplot(3, 1, 1)
+    plt.plot(CO2_trajectories.flatten().detach().numpy())
+    plt.axhline(y=CO2_setpoint)
+    plt.ylabel("CO₂ Concentration (ppm)")
+
+    # Fan Power Usage Over Time
+    plt.subplot(3, 1, 2)
+    plt.plot(P_fan_trajectories.flatten().detach().numpy())
+    plt.ylabel("Fan Power (W)")
+
+    # Cumulative Energy Cost Over Time
+    P_fan_mean = torch.mean(P_fan_trajectories, dim=1).detach()
+    electricity_cost_tensor = torch.tensor(electricity_cost, dtype=torch.float32).detach()
+    cumulative_cost = torch.cumsum(P_fan_mean * (electricity_cost_tensor / 1000), dim=0).detach().numpy()
+
+    # cumulative_cost = torch.cumsum(torch.mean(P_fan_trajectories, dim=1) * (electricity_cost / 1000), dim=0).detach().numpy()
+    plt.subplot(3, 1, 3)
+    plt.plot(cumulative_cost)
+    plt.ylabel("Cumulative Cost (DKK)")
+    plt.xlabel("Time Step")
+
+    plt.tight_layout()
     plt.show()
-    return cl_system
 
 if __name__ == '__main__':
 
@@ -219,10 +267,25 @@ if __name__ == '__main__':
     nsteps = 50
 
 
+
     #### Main program execution ####
 
     train_loader, dev_loader, nx, nu = load_training_data()
+
+    for batch in train_loader:
+        print("Initial shape of 'xn' in training batch:", batch['xn'].shape)
+        print("Initial shape of 'U' in training batch:", batch['U'].shape)
+        break  # Only inspect the first batch
     cl_system = load_closed_loop_system(nx , nu, show=True)
-    cl_system = train_control_policy(cl_system=cl_system, nsteps=nsteps, train_loader=train_loader, dev_loader=dev_loader, show=True)
+    cl_system, trajectories = train_control_policy(cl_system=cl_system, nsteps=nsteps, 
+                                                   train_loader=train_loader, dev_loader=dev_loader, show=True)
+
+
+    mae_CO2, rmse_CO2, total_fan_energy_cost = KPI_calculations(trajectories, CO2_setpoint, electricity_cost)
+
+    plots(CO2_trajectories=trajectories['xn'][:, :, 2], 
+                         CO2_setpoint=CO2_setpoint, 
+                         P_fan_trajectories=trajectories['xn'][:, :, 4], 
+                         electricity_cost=electricity_cost)
 
 
