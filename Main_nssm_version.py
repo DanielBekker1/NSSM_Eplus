@@ -74,7 +74,7 @@ def data_loading():
 
 
 nsteps = 50   # number of prediction horizon steps in the loss function
-bs = 100      # minibatching batch size
+bs = 32      # minibatching batch size
 nsim = 2000   # number of simulation steps in the dataset
 
 
@@ -185,23 +185,10 @@ def normalise_data(trainX, trainU, devX, devU, testX, testU, nx, nu, length_trai
             devX, devU, dev_data, dev_loader,
             testX, testU, test_data)
 
-print("Shape of trainX after normalisation:", trainX.shape)
-print("Shape of trainU after normalisation:", trainU.shape)
-print("Shape of devX after normalisation:", devX.shape)
-print("Shape of devU after normalisation:", devU.shape)
-print("Shape of testX after normalisation:", testX.shape)
-print("Shape of testU after normalisation:", testU.shape)
-
 trainX, trainU, train_data, train_loader, devX, devU, dev_data, dev_loader, testX, testU, test_data = normalise_data(trainX, trainU, devX, devU, testX, testU, 
                                                                                                                      nx, nu, length_train, length_dev, length_test, 
                                                                                                                      nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u)
 
-print("Shape of trainX after normalisation:", trainX.shape)
-print("Shape of trainU after normalisation:", trainU.shape)
-print("Shape of devX after normalisation:", devX.shape)
-print("Shape of devU after normalisation:", devU.shape)
-print("Shape of testX after normalisation:", testX.shape)
-print("Shape of testU after normalisation:", testU.shape)
 #Creation of NSSM structure
 
 class SSM(nn.Module):
@@ -213,13 +200,8 @@ class SSM(nn.Module):
         self.in_features, self.out_features = nx+nu, nx
         
 
-    def forward(self, x, u, d=None):
-        
-        print("Shape of x at start of forward:", x.shape)  # Should match input to fx
-        print("Shape of u at start of forward:", u.shape)
-        # Compute the next state
+    def forward(self, x, u, d=None): 
         x_next = self.fx(x) + self.fu(u)
-        print("Shape of x_next (end of forward function):", x_next.shape)  # Expecting [batch_size, 1, nx]
 
         return x_next
 
@@ -249,10 +231,8 @@ def model_loading():
         nssm_node.load_state_dict(torch.load('nssm_model_node.pth'), strict=False)
         print("Model loaded successfully.")
     
-    #dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
-    #dynamics_model.nstep_key = 'U'
-    
     return nssm_node
+
 
 
 # nssm_node = model_loading()
@@ -350,21 +330,27 @@ def plot_results(test_data, test_outputs, nx, nu, figsize=25):
 
 
 if __name__ == "__main__":
+    print("Starting script...")
     #Data preparation
     trainX, trainU, devX, devU, testX, testU, nx, nu, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u = Data_Preparation()
 
     #Model creation and loading
-    dynamics_model = model_loading()
 
-    #Loss function and problem setup
+    nssm_node = model_loading()
+
+    dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
+    dynamics_model.nstep_key = 'U'
+    # dynamics_model = dynamics_model
+
+#Loss function and problem setup
     problem = loss_func_and_problem(nx, dynamics_model)
 
-    #Optimizer setup
+#Optimizer setup
     optimizer = setup_optimizer(problem)
-    #Train NSSM model
+#Train NSSM model
     best_model = train_nssm(problem, train_loader, dev_loader, test_data, optimizer)
 
-    #Prediction, saving, and plotting
+#Prediction, saving, and plotting
     test_data, test_outputs = predict_trajectories(dynamics_model, test_data)
     save_model_and_data(dynamics_model, test_data)
     plot_results(test_data, test_outputs, nx, nu)
