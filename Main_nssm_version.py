@@ -36,95 +36,85 @@ from neuromancer.constraint import variable
 from neuromancer.loss import PenaltyLoss
 from neuromancer.modules import blocks
 
-# from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-
-#Data loading and extractions of states (X), outputs (Y) and control inputs (U)
-def data_loading():
-        
-    df = pd.read_csv("CSV_files/dataframe_output_jan_Max_speed.csv")
-    df2 = pd.read_csv("CSV_files/dataframe_output_jan_half_speed.csv")
-    df3 = pd.read_csv("CSV_files/dataframe_output_jan_zero_speed.csv")
-
-    df = df[:-16]
-    df2 = df2[:-16]
-    df3 = df3[:-16]
-
-    X_columns = ['zn_soft1_temp', 'zn_finance1_temp',
-                'Indoor_CO2_zn0', 'Indoor_CO2_zn1',
-                'air_loop_fan_electric_power', 'Occupancy_schedule'
-                    ]                                               # should contain relevant columns
-    U_columns = ['air_loop_fan_mass_flow']                          # Should contain relevant control columns
-    Y_columns = X_columns                                           # Assuming the same state variables are treated as outputs
-
- 
-    def extract_columns(df):
-        X = df[X_columns].values    
-        U = df[U_columns].values    
-        Y = df[Y_columns].values    
-        return X, U, Y
-    
-
-    X1, U1, Y1 = extract_columns(df)
-    X2, U2, Y2 = extract_columns(df2)
-    X3, U3, Y3 = extract_columns(df3)
-
-    
-
-    return X1, X2, X3, U1, U2, U3, Y1, Y2, Y3
-
-
+#Global values
 nsteps = 50   # number of prediction horizon steps in the loss function
 bs = 32      # minibatching batch size
 nsim = 2000   # number of simulation steps in the dataset
 
+#Data loading and extractions of states (X), outputs (Y) and control inputs (U)
+def data_loading():   
+    df = pd.read_csv("CSV_files/dataframe_output_jan_Max_speed.csv")
+    df2 = pd.read_csv("CSV_files/dataframe_output_jan_half_speed.csv")
+    df3 = pd.read_csv("CSV_files/dataframe_output_jan_zero_speed.csv")
+    df4 = pd.read_csv("CSV_files/electricity_price_15min_intervals.csv")
 
-#Split the data into train, dev, test (assume 50/25/25 split)
-def split_data(X, U, Y):
+    df = df[:-16]
+    df2 = df2[:-16]
+    df3 = df3[:-16]
+    df4 = df4[1:-15]
+    # print(df4.columns)
+
+    X_columns = ['zn_soft1_temp', 'zn_finance1_temp',
+                'Indoor_CO2_zn0', 'Indoor_CO2_zn1',
+                'air_loop_fan_electric_power' 
+                    ]                                               # should contain relevant columns
+    U_columns = ['air_loop_fan_mass_flow']                          # Should contain relevant control columns
+    # Y_columns = X_columns                                           # Assuming the same state variables are treated as outputs
+    D_columns = ['Occupancy_schedule']                              #Contain the disturbance variables from energy+
+    E_columns = ['electricity_price']
+    E = np.tile(df4[E_columns].values, (3, 1)).reshape(-1, 1)                           #Contain the electricity price for the disturbance signal.
+
+    def extract_columns(df):
+        X = df[X_columns].values    
+        U = df[U_columns].values    
+        # Y = df[Y_columns].values  
+        D = df[D_columns].values
+        return X, U, D
+    
+
+    X1, U1, D1 = extract_columns(df)
+    X2, U2, D2 = extract_columns(df2)
+    X3, U3, D3 = extract_columns(df3)
+
+    X = np.concatenate([X1, X2, X3], axis=0)
+    U = np.concatenate([U1, U2, U3], axis=0)
+    D = np.concatenate([D1, D2, D3], axis=0)
+
+    return X, U, D, E
+
+
+def split_data(X, U, D, E):                 #Split the data into train, dev, test (assume 50/25/25 split)
     train_size = X.shape[0] // 2
     dev_size = X.shape[0] // 4
-    test_size = X.shape[0] - train_size - dev_size
-
-    # train_size = int(0.6 * X.shape[0])
-    # dev_size = int(0.2 * X.shape[0])
-    # test_size = X.shape[0] - train_size - dev_size
 
     # Split states, inputs, and outputs into train, dev, test
-    trainX, trainU, trainY = X[:train_size], U[:train_size], Y[:train_size]
-    devX, devU, devY = X[train_size:train_size+dev_size], U[train_size:train_size+dev_size], Y[train_size:train_size+dev_size]
-    testX, testU, testY = X[train_size+dev_size:], U[train_size+dev_size:], Y[train_size+dev_size:]
+    trainX, trainU, trainD, trainE = X[:train_size], U[:train_size], D[:train_size], E[:train_size]
+    devX, devU, devD, devE = X[train_size:train_size+dev_size], U[train_size:train_size+dev_size],  D[train_size:train_size+dev_size], E[train_size:train_size+dev_size]
+    testX, testU, testD, testE = X[train_size+dev_size:], U[train_size+dev_size:], D[train_size+dev_size:], E[train_size+dev_size:]
 
-    return trainX, trainU, trainY, devX, devU, devY, testX, testU, testY
+    return trainX, trainU, trainD, trainE, devX, devU, devD, devE, testX, testU, testD, testE
 
 def Data_Preparation():
 
-    X1, X2, X3, U1, U2, U3, Y1, Y2, Y3 = data_loading()
+    X, U, D, E= data_loading()
 
-    trainX1, trainU1, trainY1, devX1, devU1, devY1, testX1, testU1, testY1 = split_data(X1, U1, Y1)
-    trainX2, trainU2, trainY2, devX2, devU2, devY2, testX2, testU2, testY2 = split_data(X2, U2, Y2)
-    trainX3, trainU3, trainY3, devX3, devU3, devY3, testX3, testU3, testY3 = split_data(X3, U3, Y3)
+    trainX, trainU, trainD, trainE, devX, devU, devD, devE, testX, testU, testD, testE = split_data(X, U, D, E)
 
 
-    trainX = np.concatenate([trainX1, trainX2, trainX3], axis=0)
-    trainU = np.concatenate([trainU1, trainU2, trainU3], axis=0)
-    # trainY = np.concatenate([trainY1, trainY2, trainY3], axis=0)
-
-    # Combine dev sets
-    devX = np.concatenate([devX1, devX2, devX3], axis=0)
-    devU = np.concatenate([devU1, devU2, devU3], axis=0)
-    # devY = np.concatenate([devY1, devY2, devY3], axis=0)
-
-    # Combine test sets
-    testX = np.concatenate([testX1, testX2, testX3], axis=0)
-    testU = np.concatenate([testU1, testU2, testU3], axis=0)
-    # testY = np.concatenate([testY1, testY2, testY3], axis=0)
+    #Combine electricity price column to the occupancy column.
+    trainD = np.hstack((trainD, trainE))
+    devD = np.hstack((devD, devE))
+    testD = np.hstack((testD, testE))
 
     # Calculate lengths and batch sizes (dimensions)
     nx = trainX.shape[1]                                        # Number of states in the model (nx)
     nu = trainU.shape[1]                                        # Number of inputs in the model (nu)
+    nd = trainD.shape[1]
 
     length_train = (trainX.shape[0] // nsteps) * nsteps
     length_dev = (devX.shape[0] // nsteps) * nsteps
     length_test = (testX.shape[0] // nsteps) * nsteps
+    
 
     nbatch_train = length_train // nsteps
     nbatch_dev = length_dev // nsteps
@@ -133,75 +123,82 @@ def Data_Preparation():
     # Calculate means and standard deviations for normalization
     mean_x, std_x = trainX.mean(axis=0), trainX.std(axis=0) 
     mean_u, std_u = trainU.mean(axis=0), trainU.std(axis=0)
+    mean_d, std_d = trainD.mean(axis=0), trainD.std(axis=0)
     
 
-    return (trainX, trainU, devX, devU, testX, testU, 
-            nx, nu, length_train, length_dev, length_test, 
+    return (trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, 
+            nx, nu, nd, length_train, length_dev, length_test, 
             nbatch_train, nbatch_dev, nbatch_test, 
-            mean_x, std_x, mean_u, std_u)
+            mean_x, std_x, mean_u, std_u, mean_d, std_d)
 
 
 #Normalisation function
-def normalize(x, mean, std):
+def normalise(x, mean, std):
         return (x - mean) / std
 
-trainX, trainU, devX, devU, testX, testU, nx, nu, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u = Data_Preparation()
+trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, nx, nu, nd, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d = Data_Preparation()
 
-
-def normalise_data(trainX, trainU, devX, devU, testX, testU, nx, nu, length_train, length_dev, length_test, 
-                    nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u):
-    trainX = normalize(trainX[:length_train], mean_x, std_x)
-    # trainX = train_sim['X'][:length].reshape(nbatch, nsteps, nx)
-    trainX = trainX.reshape(nbatch_train, nsteps, nx)
+def normalise_data(trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, nx, nu, nd, length_train, length_dev, length_test, 
+                    nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d):
+    trainX = normalise(trainX[:length_train], mean_x, std_x)
+    trainX = trainX[:length_train].reshape(nbatch_train, nsteps, nx)
     trainX = torch.tensor(trainX, dtype=torch.float32).clone().detach()
-    trainU = normalize(trainU[:length_train], mean_u, std_u)
-    trainU = trainU[:length_train].reshape(nbatch_train, nsteps, nu)
+    trainU = normalise(trainU[:length_train], mean_u, std_u)
+    trainU = trainU[:length_train].reshape(nbatch_train, nsteps, nu)                    #Ensure the correct length of data (no additional data)
     trainU = torch.tensor(trainU, dtype=torch.float32).clone().detach()
+    trainD = normalise(trainD[:length_train], mean_d, std_d)
+    trainD = trainD[:length_train].reshape(nbatch_train, nsteps, nd)
+    trainD = torch.tensor(trainD, dtype=torch.float32).clone().detach()
     train_data = DictDataset({'X': trainX, 'xn': trainX[:, 0:1, :],
-                                'U': trainU}, name='train')
+                                'U': trainU, 'd': trainD}, name='train')
     train_loader = DataLoader(train_data, batch_size=bs,
                                 collate_fn=train_data.collate_fn, shuffle=False)        #Shuffle Is changed to False
 
-    devX = normalize(devX[:length_dev], mean_x, std_x)
-    devX = devX.reshape(nbatch_dev, nsteps, nx)
+    devX = normalise(devX[:length_dev], mean_x, std_x)
+    devX = devX[:length_dev].reshape(nbatch_dev, nsteps, nx)
     devX = torch.tensor(devX, dtype=torch.float32).clone().detach()
-    devU = normalize(devU[:length_dev], mean_u, std_u)
-    devU = devU[:length_dev].reshape(nbatch_dev, nsteps, nu)        #Not sure if the length should be used here and the corresponding places^^
+    devU = normalise(devU[:length_dev], mean_u, std_u)
+    devU = devU[:length_dev].reshape(nbatch_dev, nsteps, nu)        
     devU = torch.tensor(devU, dtype=torch.float32).clone().detach()
+    devD = normalise(devD[:length_dev], mean_d, std_d)
+    devD = devD[:length_dev].reshape(nbatch_dev, nsteps, nd)
+    devD = torch.tensor(devD, dtype=torch.float32).clone().detach()
     dev_data = DictDataset({'X': devX, 'xn': devX[:, 0:1, :],
-                            'U': devU}, name='dev')
+                            'U': devU, 'd': devD}, name='dev')
     dev_loader = DataLoader(dev_data, batch_size=bs,
                             collate_fn=dev_data.collate_fn, shuffle=False)              #Shuffle Is changed to False
 
-    testX = normalize(testX[:length_test], mean_x, std_x)
-    testX = testX.reshape(nbatch_test, nsteps, nx)
+    testX = normalise(testX[:length_test], mean_x, std_x)
+    testX = testX[:length_test].reshape(nbatch_test, nsteps, nx)
     testX = torch.tensor(testX, dtype=torch.float32).clone().detach()
-    testU = normalize(testU[:length_test], mean_u, std_u)
+    testU = normalise(testU[:length_test], mean_u, std_u)
     testU = testU[:length_test].reshape(nbatch_test, nsteps, nu)
     testU = torch.tensor(testU, dtype=torch.float32).clone().detach()
+    testD = normalise(testD[:length_test], mean_d, std_d)
+    testD = testD[:length_test].reshape(nbatch_test, nsteps, nd)
+    testD = torch.tensor(testD, dtype=torch.float32).clone().detach()
     test_data = {'X': testX, 'xn': testX[:, 0:1, :],
-                    'U': testU}
-    return (trainX, trainU, train_data, train_loader,
-            devX, devU, dev_data, dev_loader,
-            testX, testU, test_data)
+                    'U': testU, 'd': testD}
+    return (trainX, trainU, trainD, train_data, train_loader,
+            devX, devU, devD, dev_data, dev_loader,
+            testX, testU, testD, test_data)
 
-trainX, trainU, train_data, train_loader, devX, devU, dev_data, dev_loader, testX, testU, test_data = normalise_data(trainX, trainU, devX, devU, testX, testU, 
-                                                                                                                     nx, nu, length_train, length_dev, length_test, 
-                                                                                                                     nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u)
+trainX, trainU, trainD, train_data, train_loader, devX, devU, devD, dev_data, dev_loader, testX, testU, testD, test_data = normalise_data(trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, 
+                                                                                                                     nx, nu, nd, length_train, length_dev, length_test, 
+                                                                                                                     nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d)
 
 #Creation of NSSM structure
-
 class SSM(nn.Module):
 
-    def __init__(self, fx, fu, nx, nu):
+    def __init__(self, fx, fu, fd, nx, nu, nd):
         super().__init__()
-        self.fx, self.fu = fx, fu
-        self.nx, self.nu = nx, nu
-        self.in_features, self.out_features = nx+nu, nx
+        self.fx, self.fu, self.fd = fx, fu, fd
+        self.nx, self.nu, self.nd = nx, nu, nd
+        self.in_features, self.out_features = nx + nu + nd, nx
         
 
-    def forward(self, x, u, d=None): 
-        x_next = self.fx(x) + self.fu(u)
+    def forward(self, x, u, d): 
+        x_next = self.fx(x) + self.fu(u) + self.fd(d)
 
         return x_next
 
@@ -213,19 +210,24 @@ class SSM(nn.Module):
 A = blocks.MLP(nx, nx, bias=True,          #Bias is intial True
                  linear_map=torch.nn.Linear,
                  nonlin=torch.nn.ReLU,
-                 hsizes=[18, 18, 18])
+                 hsizes=[64, 64, 64])
 
 #models how the control input (u) affect the states
 B = blocks.MLP(nu, nx, bias=True,          #Bias is intial True
                 linear_map=torch.nn.Linear,
                 nonlin=torch.nn.ReLU,
-                hsizes=[18, 18, 18])
+                hsizes=[64, 64, 64])
+
+C = blocks.MLP(nd, nx, bias=True,
+                 linear_map=torch.nn.Linear,
+                 nonlin=torch.nn.ReLU,
+                 hsizes=[64, 64, 64])
 
 
 def model_loading():
-    ssm = SSM(A, B, nx, nu)
+    ssm = SSM(A, B, C, nx, nu, nd)
     # create symbolic system model in Neuromancer
-    nssm_node = Node(ssm, ['xn', 'U'], ['xn'], name='NSSM')
+    nssm_node = Node(ssm, ['xn', 'U', 'd'], ['xn'], name='NSSM')
 
     if os.path.exists('nssm_model_node.pth'):
         nssm_node.load_state_dict(torch.load('nssm_model_node.pth'), strict=False)
@@ -237,7 +239,7 @@ def model_loading():
 
 # nssm_node = model_loading()
 
-def loss_func_and_problem(nx, dynamics_model):
+def loss_func_and_problem(dynamics_model):
     print("Shape of test_data['X'] (reference trajectory):", test_data["X"].shape)
     x = variable("X")
     xhat = variable('xn')[:, :-1, :]
@@ -257,7 +259,7 @@ def loss_func_and_problem(nx, dynamics_model):
     loss = PenaltyLoss(objectives, []) 
     # construct constrained optimization problem
     problem = Problem([dynamics_model], loss)
-    #problem.show()
+    problem.show()
     return problem
 
 def setup_optimizer(problem):
@@ -266,14 +268,6 @@ def setup_optimizer(problem):
 
 #Training of NSSM
 def train_nssm(problem, train_loader, dev_loader, test_data, optimizer):
-    print(f"Type of train_loader: {type(train_loader)}")
-    print(f"Type of dev_loader: {type(dev_loader)}")
-    print(f"Type of test_data: {type(test_data)}")
-    print(f"Contents of test_data keys: {list(test_data.keys())}")
-    print(f"Type of test_data['X']: {type(test_data['X'])}")
-    print(f"Type of test_data['U']: {type(test_data['U'])}")
-    print(f"Type of test_data['xn']: {type(test_data['xn'])}")
-
     trainer = Trainer(
         problem,
         train_loader,
@@ -302,16 +296,17 @@ def save_model_and_data(nssm_node, test_data, model_path='nssm_model_node.pth', 
 def predict_trajectories(dynamics_model, test_data):
     test_outputs = dynamics_model(test_data)
     test_data["xn"] = test_outputs["xn"]
-    print("Shape of xn (predicted states) from System forward pass:", test_outputs["xn"].shape)
     return test_data, test_outputs
 
-def plot_results(test_data, test_outputs, nx, nu, figsize=25):
+def plot_results(test_data, test_outputs, nx, nu, nd, figsize=25):
     pred_traj = test_outputs['xn'][:, :-1, :].detach().numpy().reshape(-1, nx)
     true_traj = test_data['X'].detach().numpy().reshape(-1, nx)
     input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
+    dist_traj = test_data['d'].detach().numpy().reshape(-1, nd)
     pred_traj, true_traj = pred_traj.transpose(1, 0), true_traj.transpose(1, 0)
+    dist_traj = dist_traj.transpose(1, 0)
 
-    fig, ax = plt.subplots(nx + nu, figsize=(figsize, figsize))
+    fig1, ax = plt.subplots(nx + nu, figsize=(figsize, figsize))
     labels = [f'$y_{k}$' for k in range(nx)]
     for row, (t1, t2, label) in enumerate(zip(true_traj, pred_traj, labels)):
         axe = ax[row] if nx > 1 else ax
@@ -324,6 +319,17 @@ def plot_results(test_data, test_outputs, nx, nu, figsize=25):
     ax[-1].set_xlabel('$time$', fontsize=figsize)
     ax[-1].set_ylabel('$u$', rotation=0, labelpad=20, fontsize=figsize)
     ax[-1].tick_params(labelbottom=True, labelsize=figsize)
+
+    fig2, ax2 = plt.subplots(nd, figsize=(figsize, figsize))
+    ax2 = ax2 if nd > 1 else [ax2]  # Ensure ax2 is always iterable
+    dist_labels = [f'$d_{k}$' for k in range(nd)]
+    
+    for i in range(nd):
+        ax2[i].plot(dist_traj[i], 'orange', linewidth=2.0, label=f'Disturbance {dist_labels[i]}')
+        ax2[i].set_ylabel(dist_labels[i], rotation=0, labelpad=20, fontsize=figsize)
+        ax2[i].tick_params(labelbottom=True, labelsize=figsize)
+        ax2[i].legend(fontsize=figsize)
+
     plt.tight_layout()
     plt.show()
 
@@ -332,7 +338,9 @@ def plot_results(test_data, test_outputs, nx, nu, figsize=25):
 if __name__ == "__main__":
     print("Starting script...")
     #Data preparation
-    trainX, trainU, devX, devU, testX, testU, nx, nu, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u = Data_Preparation()
+    trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, \
+        nx, nu, nd, length_train, length_dev, length_test, nbatch_train, \
+            nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d= Data_Preparation()
 
     #Model creation and loading
 
@@ -343,7 +351,7 @@ if __name__ == "__main__":
     # dynamics_model = dynamics_model
 
 #Loss function and problem setup
-    problem = loss_func_and_problem(nx, dynamics_model)
+    problem = loss_func_and_problem(dynamics_model)
 
 #Optimizer setup
     optimizer = setup_optimizer(problem)
@@ -353,7 +361,7 @@ if __name__ == "__main__":
 #Prediction, saving, and plotting
     test_data, test_outputs = predict_trajectories(dynamics_model, test_data)
     save_model_and_data(dynamics_model, test_data)
-    plot_results(test_data, test_outputs, nx, nu)
+    plot_results(test_data, test_outputs, nx, nu, nd)
 
 
 '''
