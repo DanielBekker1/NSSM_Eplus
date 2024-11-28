@@ -62,7 +62,7 @@ def data_loading():
     # Y_columns = X_columns                                           # Assuming the same state variables are treated as outputs
     D_columns = ['Occupancy_schedule']                              #Contain the disturbance variables from energy+
     E_columns = ['electricity_price']
-    E = np.tile(df4[E_columns].values, (3, 1)).reshape(-1, 1)                           #Contain the electricity price for the disturbance signal.
+    E = np.tile(df4[E_columns].values, (3, 1)).reshape(-1, 1)                           #Contain the electricity price for the disturbance signal. Increase size with 3 to be equal other df.
 
     def extract_columns(df):
         X = df[X_columns].values    
@@ -71,41 +71,58 @@ def data_loading():
         D = df[D_columns].values
         return X, U, D
     
-
     X1, U1, D1 = extract_columns(df)
     X2, U2, D2 = extract_columns(df2)
     X3, U3, D3 = extract_columns(df3)
 
-    X = np.concatenate([X1, X2, X3], axis=0)
-    U = np.concatenate([U1, U2, U3], axis=0)
-    D = np.concatenate([D1, D2, D3], axis=0)
+    print("Original electricity price in dataframe (first 10 values):", df4['electricity_price'].head(10))
 
-    return X, U, D, E
+    return X1, U1, D1, X2, U2, D2, X3, U3, D3, E
 
 
-def split_data(X, U, D, E):                 #Split the data into train, dev, test (assume 50/25/25 split)
-    train_size = X.shape[0] // 2
-    dev_size = X.shape[0] // 4
+def split_data(X1, U1, D1, X2, U2, D2, X3, U3, D3, E):                 #Split the data into train, dev, test (assume 50/25/25 split)
+    train_size = 1000
+    dev_size = 500
+    test_size = 500
 
-    # Split states, inputs, and outputs into train, dev, test
-    trainX, trainU, trainD, trainE = X[:train_size], U[:train_size], D[:train_size], E[:train_size]
-    devX, devU, devD, devE = X[train_size:train_size+dev_size], U[train_size:train_size+dev_size],  D[train_size:train_size+dev_size], E[train_size:train_size+dev_size]
-    testX, testU, testD, testE = X[train_size+dev_size:], U[train_size+dev_size:], D[train_size+dev_size:], E[train_size+dev_size:]
+    #Scenario 1 (df1)
+    trainX1, devX1, testX1 = X1[:train_size], X1[train_size:train_size + dev_size], X1[train_size + dev_size:]
+    trainU1, devU1, testU1 = U1[:train_size], U1[train_size:train_size + dev_size], U1[train_size + dev_size:]
+    trainD1, devD1, testD1 = D1[:train_size], D1[train_size:train_size + dev_size], D1[train_size + dev_size:]
+    #Scenario 2 (df2)
+    trainX2, devX2, testX2 = X2[:train_size], X2[train_size:train_size + dev_size], X2[train_size + dev_size:]
+    trainU2, devU2, testU2 = U2[:train_size], U2[train_size:train_size + dev_size], U2[train_size + dev_size:]
+    trainD2, devD2, testD2 = D2[:train_size], D2[train_size:train_size + dev_size], D2[train_size + dev_size:]
+    #Scenario 3 (df3)
+    trainX3, devX3, testX3 = X3[:train_size], X3[train_size:train_size + dev_size], X3[train_size + dev_size:]
+    trainU3, devU3, testU3 = U3[:train_size], U3[train_size:train_size + dev_size], U3[train_size + dev_size:]
+    trainD3, devD3, testD3 = D3[:train_size], D3[train_size:train_size + dev_size], D3[train_size + dev_size:]
 
-    return trainX, trainU, trainD, trainE, devX, devU, devD, devE, testX, testU, testD, testE
+    # Combine data from all scenarios
+    trainX = np.concatenate([trainX1, trainX2, trainX3], axis=0)
+    trainU = np.concatenate([trainU1, trainU2, trainU3], axis=0)
+    trainD = np.concatenate([trainD1, trainD2, trainD3], axis=0)
+
+    devX = np.concatenate([devX1, devX2, devX3], axis=0)
+    devU = np.concatenate([devU1, devU2, devU3], axis=0)
+    devD = np.concatenate([devD1, devD2, devD3], axis=0)
+
+    testX = np.concatenate([testX1, testX2, testX3], axis=0)
+    testU = np.concatenate([testU1, testU2, testU3], axis=0)
+    testD = np.concatenate([testD1, testD2, testD3], axis=0)
+
+    #Combine the two disturbance signal 
+    trainD = np.hstack((trainD, E[:trainD.shape[0]]))
+    devD = np.hstack((devD, E[trainD.shape[0]:trainD.shape[0] + devD.shape[0]]))
+    testD = np.hstack((testD, E[trainD.shape[0] + devD.shape[0]:]))
+    return trainX, trainU, trainD, devX, devU, devD, testX, testU, testD
 
 def Data_Preparation():
 
-    X, U, D, E= data_loading()
+    X1, U1, D1, X2, U2, D2, X3, U3, D3, E = data_loading()
 
-    trainX, trainU, trainD, trainE, devX, devU, devD, devE, testX, testU, testD, testE = split_data(X, U, D, E)
-
-
-    #Combine electricity price column to the occupancy column.
-    trainD = np.hstack((trainD, trainE))
-    devD = np.hstack((devD, devE))
-    testD = np.hstack((testD, testE))
-
+    trainX, trainU, trainD, devX, devU, devD, testX, testU, testD = split_data(X1, U1, D1, X2, U2, D2, X3, U3, D3, E)
+    
     # Calculate lengths and batch sizes (dimensions)
     nx = trainX.shape[1]                                        # Number of states in the model (nx)
     nu = trainU.shape[1]                                        # Number of inputs in the model (nu)
@@ -124,7 +141,7 @@ def Data_Preparation():
     mean_x, std_x = trainX.mean(axis=0), trainX.std(axis=0) 
     mean_u, std_u = trainU.mean(axis=0), trainU.std(axis=0)
     mean_d, std_d = trainD.mean(axis=0), trainD.std(axis=0)
-    
+
 
     return (trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, 
             nx, nu, nd, length_train, length_dev, length_test, 
@@ -135,6 +152,9 @@ def Data_Preparation():
 #Normalisation function
 def normalise(x, mean, std):
         return (x - mean) / std
+
+def denormalise(data, mean, std):
+    return data * std + mean
 
 trainX, trainU, trainD, devX, devU, devD, testX, testU, testD, nx, nu, nd, length_train, length_dev, length_test, nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d = Data_Preparation()
 
@@ -187,6 +207,8 @@ trainX, trainU, trainD, train_data, train_loader, devX, devU, devD, dev_data, de
                                                                                                                      nx, nu, nd, length_train, length_dev, length_test, 
                                                                                                                      nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d)
 
+print("Electricity price in testD (first 10 values):", testD[:10, 1])
+
 #Creation of NSSM structure
 class SSM(nn.Module):
 
@@ -234,7 +256,6 @@ def model_loading():
         print("Model loaded successfully.")
     
     return nssm_node
-
 
 
 # nssm_node = model_loading()
@@ -286,11 +307,6 @@ def train_nssm(problem, train_loader, dev_loader, test_data, optimizer):
 
     return trainer.train()
 
-#Saving of NSSM model and test_data
-def save_model_and_data(nssm_node, test_data, model_path='nssm_model_node.pth', data_path='test_data.pkl'):
-    torch.save(nssm_node.state_dict(), model_path)
-    with open(data_path, 'wb') as f:
-        pickle.dump(test_data, f)
 
 #Predictions of states
 def predict_trajectories(dynamics_model, test_data):
@@ -298,11 +314,52 @@ def predict_trajectories(dynamics_model, test_data):
     test_data["xn"] = test_outputs["xn"]
     return test_data, test_outputs
 
-def plot_results(test_data, test_outputs, nx, nu, nd, figsize=25):
-    pred_traj = test_outputs['xn'][:, :-1, :].detach().numpy().reshape(-1, nx)
-    true_traj = test_data['X'].detach().numpy().reshape(-1, nx)
-    input_traj = test_data['U'].detach().numpy().reshape(-1, nu)
-    dist_traj = test_data['d'].detach().numpy().reshape(-1, nd)
+def denormalise_outputs(test_data, test_outputs, mean_x, std_x, mean_u, std_u, mean_d, std_d):
+    """
+    Denormalizes test data and test outputs.
+    """
+    denorm_test_data = {
+        "X": denormalise(test_data["X"].detach().numpy(), mean_x, std_x),
+        "U": denormalise(test_data["U"].detach().numpy(), mean_u, std_u),
+        "xn": denormalise(test_data["xn"].detach().numpy(), mean_x, std_x),
+        "d": denormalise(test_data["d"].detach().numpy(), mean_d, std_d)
+    }
+    denorm_test_outputs = {
+        "X": denormalise(test_outputs["X"].detach().numpy(), mean_x, std_x),
+        "U": denormalise(test_outputs["U"].detach().numpy(), mean_u, std_u),
+        "xn": denormalise(test_outputs["xn"].detach().numpy(), mean_x, std_x),
+        "d": denormalise(test_outputs["d"].detach().numpy(), mean_d, std_d)
+    }
+    return denorm_test_data, denorm_test_outputs
+
+#Saving of NSSM model and test_data
+def save_model_and_data(nssm_node, testX, testU, testD, mean_x, std_x, mean_u, std_u, mean_d, std_d, denorm_test_outputs, model_path='nssm_model_node.pth', data_path='test_data.pkl'):
+    torch.save(nssm_node.state_dict(), model_path)
+    CL_data = {
+    "testX": (testX),
+    "testU": (testU),
+    "testD": (testD),
+    # "testX": denormalise(testX, mean_x, std_x),
+    # "testU": denormalise(testU, mean_u, std_u),
+    # "testD": denormalise(testD, mean_d, std_d),
+    "U": denorm_test_outputs["U"],
+    "xn": denorm_test_outputs["xn"],
+    "mean_x": mean_x,
+    "mean_u": mean_u,
+    "mean_d": mean_d,
+    "std_x": std_x,
+    "std_u": std_u,
+    "std_d": std_d
+    }
+    with open(data_path, 'wb') as f:
+        pickle.dump(CL_data, f)
+
+
+def plot_results(denorm_test_data, denorm_test_outputs, nx, nu, nd, figsize=25):
+    pred_traj = denorm_test_outputs['xn'][:, :-1, :].reshape(-1, nx)
+    true_traj = denorm_test_data['X'].reshape(-1, nx)
+    input_traj = denorm_test_data['U'].reshape(-1, nu)
+    dist_traj = denorm_test_data['d'].reshape(-1, nd)
     pred_traj, true_traj = pred_traj.transpose(1, 0), true_traj.transpose(1, 0)
     dist_traj = dist_traj.transpose(1, 0)
 
@@ -343,14 +400,13 @@ if __name__ == "__main__":
             nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d= Data_Preparation()
 
     #Model creation and loading
-
     nssm_node = model_loading()
 
     dynamics_model = System([nssm_node], name='system', nsteps=nsteps)
     dynamics_model.nstep_key = 'U'
-    # dynamics_model = dynamics_model
+   
 
-#Loss function and problem setup
+    #Loss function and problem setup
     problem = loss_func_and_problem(dynamics_model)
 
 #Optimizer setup
@@ -358,23 +414,12 @@ if __name__ == "__main__":
 #Train NSSM model
     best_model = train_nssm(problem, train_loader, dev_loader, test_data, optimizer)
 
+
 #Prediction, saving, and plotting
     test_data, test_outputs = predict_trajectories(dynamics_model, test_data)
-    save_model_and_data(dynamics_model, test_data)
-    plot_results(test_data, test_outputs, nx, nu, nd)
 
+    denorm_test_data, denorm_test_outputs =  denormalise_outputs(test_data, test_outputs, mean_x, std_x, mean_u, std_u, mean_d, std_d)
+    
+    save_model_and_data(dynamics_model, testX, testU, testD, mean_x, std_x, mean_u, std_u, mean_d, std_d, denorm_test_outputs)
+    plot_results(denorm_test_data, denorm_test_outputs, nx, nu, nd)
 
-'''
-Add state co2 for rooms to control. Occupancy as a state. 
-Main fan speed as U.
-Electricity consumption as a state.
-Orginase current model to have everything in the states and U as input. Actual input is one sample X and prediction horison samples of U(Could be 50 samples).
-Want to generate testdata with the correct shape (Equal to prediction horison (Xn[1,1,(nx)]   U(1,50,1) 50 equal to prediction horizon))
-
-Model will look for key x in the input data. The model needs to know for how long the prediction.
-I might want to change the imput the key. Specify the key! -> dynamic_model.nstep_key = 'U'
-
-Inputs to model:
-initial X, All U for the time horizon. 
-Geneate new optimisation predicting
-'''
