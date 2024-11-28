@@ -24,67 +24,91 @@ from torch.utils.data import DataLoader
 from neuromancer.dataset import DictDataset
 from neuromancer.plot import pltCL, pltPhase
 
-def load_closed_loop_system(nx, nu, show=False):
+
+def load_closed_loop_system(nx, nu, nd, show=False):
 
     nssm_node = model_loading()
     net = blocks.MLP_bounds(
-        insize=nx, 
+        insize=nx + nd, 
         outsize=nu,  
         hsizes=[64, 64, 64],                
         nonlin=nn.GELU,  
-        min=0,  # Fan speed minimum
-        max=1,  # Fan speed maximum
+        min=0,      # Fan speed minimum
+        max=1.35,   # Fan speed maximum
     )
 
-    policy = Node(net, ["xn"], ["U"], name="control_policy")  # Control policy node
+    dist_model = lambda d: d
+    dist_obs = Node(dist_model, ["d"], ["d_obs"], name='dist_obs')
+
+    
+    policy = Node(net, ["xn", "d_obs"], ["U"], name="control_policy")  # Control policy node
     nssm_node.freeze()
-    cl_system = System([policy, nssm_node], name="cl_system", nsteps=nsteps)
+    cl_system = System([dist_obs, policy, nssm_node], name="cl_system", nsteps=nsteps)
     cl_system.nstep_key = "U"
 
-    # if show:
-    #     cl_system.show()
+    if show:
+        cl_system.show()
 
     return cl_system
 
-def load_training_data():
+def create_sliding_windows(data, window_size=50):
+    """
+    Convert data into sliding windows. The window size is set to 50.
+    """
+    num_sequences = len(data) // window_size
+    return data[:num_sequences * window_size].reshape(num_sequences, window_size, -1)
 
-    with open("test_data.pkl", "rb") as f:
-        test_data = pickle.load(f)
+def normalise(data, mean, std):
+        return (data - mean) / std
 
-    test_data["xn"] = test_data["xn"][:, 0:1, :]
-    CL_dataset = DictDataset({"xn": test_data["xn"], "U": test_data["U"]}, name="CL_dataset") # The name argument is important
+def denormalise(data, mean, std):
+    result = data * std + mean
+    print(f"Denormalising: mean={mean}, std={std}, result_shape={result.shape}")
+    return result
+
+def load_training_data(data_path = "test_data.pkl"):           #The data loading of this should be changed to 
+
+    with open(data_path, "rb") as f:
+        CL_data = pickle.load(f)
+
+    #Calculating mean and standard deviation
     
-    # Splitting the data into train, dev and test. 60% train, 20 % for dev and test.
-    train_size = int((3/5) * len(CL_dataset))
-    dev_size = test_size = int((1/5) * len(CL_dataset))
+    mean_xn, std_xn = CL_data["mean_x"], CL_data["std_x"]
+    mean_u, std_u = CL_data["mean_u"], CL_data["std_u"]
+    mean_d, std_d = CL_data["mean_d"], CL_data["std_d"]
 
-    #squential split of the CL data.
-    CL_train_data = CL_dataset[:train_size]
-    CL_dev_data = CL_dataset[train_size:train_size + dev_size]
-    CL_test_data = CL_dataset[train_size + dev_size:train_size + dev_size + test_size]
+    testD = normalise(CL_data["testD"], mean_d, std_d)
+    xn = normalise(CL_data["xn"], mean_xn, std_xn)
+    u = normalise(CL_data["testU"], mean_u, std_u)
+    testD = torch.tensor(create_sliding_windows(testD, window_size=50), dtype=torch.float32)
+    xn = torch.tensor(xn[:, 0:1, :], dtype=torch.float32)
+    u = torch.tensor(u, dtype=torch.float32)
+    # Splitting the data into train, dev and test. 50% train, 25 % for dev and test.
+    total_length = xn.shape[0]
+    train_size = int(0.5 * total_length)
+    dev_size = test_size = int(0.25 * total_length)
 
-    CL_train_dataset = DictDataset(CL_train_data, name='train')
-    CL_dev_dataset = DictDataset(CL_dev_data, name='dev')
-    CL_test_dataset = DictDataset(CL_test_data, name= 'test')
+    CL_train_data = DictDataset({"xn": xn[:train_size], "d": testD[:train_size]}, name="train")
+    CL_dev_data = DictDataset({"xn": xn[train_size:train_size + dev_size], "d": testD[train_size:train_size + dev_size]}, name="dev")
+    CL_test_data = {"xn": xn[train_size + dev_size:],  "d": testD[train_size + dev_size:]}
+
 
     bs = 32
 
-    train_loader = DataLoader(CL_train_dataset, 
-                              collate_fn=CL_train_dataset.collate_fn, batch_size=bs, shuffle=False)
-    dev_loader = DataLoader(CL_dev_dataset, 
-                            collate_fn=CL_dev_dataset.collate_fn, batch_size=bs, shuffle=False)
-    test_loader = DataLoader(CL_test_dataset, 
-                             collate_fn=CL_test_dataset.collate_fn, batch_size=bs, shuffle=False)
-   
-    nx = test_data["X"].shape[2]                   #Number of states
-    nu = test_data["U"].shape[2]                   #Number of inputs
+    train_loader = DataLoader(CL_train_data, 
+                              collate_fn=CL_train_data.collate_fn, batch_size=bs, shuffle=False)
+    dev_loader = DataLoader(CL_dev_data, 
+                            collate_fn=CL_dev_data.collate_fn, batch_size=bs, shuffle=False)
+    
+
+    nx = xn.shape[2]                                   #Number of states
+    nu = 1
+    nd = testD.shape[2]
 
 
-    return train_loader, dev_loader, nx, nu
+    return train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u
 
-
-def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, show=True):
-
+def con_and_Obj (cl_system : System, nsteps , show=False):
     '''
     Below the cost function, constrains and optimisation of problem
     '''
@@ -92,36 +116,31 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     # cost_function = (CO2 - CO2_setpoint)**2 + alpha * P_fan * (electricity_cost[0] / 1000)  # Only using first electricity cost value for now
     #Define the symbolic variables for the control policy
 
-    for batch in train_loader:
-        print(f"Batch 'xn' shape (should be [batch_size, 1, nx]): {batch['xn'].shape}")
-        print(f"Batch 'U' shape: {batch['U'].shape}")
-        break  # Only print for the first batch to avoid clutter
-
-    for batch in train_loader:
-        x_tensor = batch["xn"]
-        u_tensor = batch["U"]
-        print("Shape of x_tensor (initial condition):", x_tensor.shape)  # Expected to be [batch_size, 1, nx]
-        print("Shape of u_tensor:", u_tensor.shape)  # Expected shape for control input
-
-        # (Assuming you run `cl_system` on `x_tensor` here, or later in the code)
-        break  # Only print for the first batch
-
     u = variable("U")
     xn = variable("xn")
-    xhat = variable("xn")[:, :-1, :]
+    d = variable("d")
     CO2 = variable("xn")[:, :-1, 2] 
     P_fan = variable("xn")[:, :-1, 4]
     temp_soft = variable("xn")[:, :-1, 0]
-    
-    obj_1 = ((CO2 - CO2_setpoint)**2).minimize()
+    electricity_price = variable("d")[:, :, 1]
+
+    obj_1 = (max(CO2 - CO2_setpoint, 0)**2).minimize()      #If CO2 > CO2_setpoint, returns CO2 - CO2_setpoint, else 0
     obj_1.name = "CO2_loss"
 
-    obj_2 =  ((electricity_cost[0]/1000)*P_fan).minimize()
+    # electricity_price = d[:, :, 1]
+
+    obj_2 =  ((electricity_price)*(P_fan/1e6)).minimize()
     obj_2.name = "Energy_loss"
 
+    # Penalise odd fan speed (anything else than 0, 0.675 and 1.35) 
+    obj_3 = ((u - U_min)**2).minimize() 
+    obj_3.name = "fan_spd_low"
+    obj_4 = ((u - U_medium)**2).minimize() 
+    obj_4.name = "fan_spd_medium"
+    obj_5 = ((u - U_max)**2).minimize()
+    obj_5.name = "fan_spd_high"    
 
-    
-    objectives = [obj_1, obj_2]
+    objectives = [obj_1, obj_2, obj_3, obj_4, obj_5]
 
     # Define the constrains
     U_min_constraint = (u >= U_min)
@@ -150,25 +169,23 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
     loss = PenaltyLoss(objectives, constraints)
     problem = Problem([cl_system], loss)
     
-    # if show:
-    #     problem.show()
+    if show:
+        problem.show()
 
     cl_system.nsteps = nsteps # Coming from the constant set in the main block
 
-    # for batch in train_loader:
-    #     print(f"Batch 'xn' shape: {batch['xn'].shape}, 'U' shape: {batch['U'].shape}")
-    #     break
+    return problem
 
-
-
-    optimizer = torch.optim.AdamW(problem.parameters(), lr=0.001)
+def train_control_policy(problem, train_loader, dev_loader, CL_test_data):
+    optimizer = torch.optim.AdamW(problem.parameters(), lr=0.0001)
     trainer = Trainer(
         problem,
         train_loader,
         dev_loader,
+        CL_test_data,
         optimizer=optimizer,
         patience=100,
-        epochs=1000,
+        epochs=10,
         warmup=100,
         eval_metric="dev_loss",
         train_metric="train_loss",
@@ -176,78 +193,113 @@ def train_control_policy(cl_system : System, nsteps, train_loader, dev_loader, s
         test_metric="dev_loss",
     )
 
-    # Train control policy
     best_model = trainer.train()
+    # Train control policy
+    
     # load best trained model
     trainer.model.load_state_dict(best_model)
     torch.save(cl_system.state_dict(), "cl_system.pth")
 
     problem.load_state_dict(best_model)
 
-    """
-    You also need to reformulate the data to be in the same format as the training data.
-    There is no "X" in the test data.
-    """
+    return cl_system, problem
 
-    data = {'xn': torch.ones(1, 1, nx, dtype=torch.float32)}        #Changed from X to xn
+def predict_trajectories(cl_system, CL_test_data, nsteps):
+
+    test_data = {
+        'xn': CL_test_data["xn"],  
+        'd': CL_test_data["d"],    
+        # No "U" since it's generated by the control policy
+    }       
     # nsteps = 50
     cl_system.nsteps = nsteps
-    trajectories = cl_system(data)
+    trajectories = cl_system(test_data)
+
+    xn_single = trajectories['xn'][0, :, :2].detach()  
+    U_single = trajectories['U'][0, :, :].detach()  
     
-    print("Shape of trajectories['xn'] before reshape:", trajectories['xn'].shape)
-    print("Shape of trajectories['U'] before reshape:", trajectories['U'].shape)
-    print("Expected nsteps:", nsteps)
-    print("Expected nx:", nx)
-
-    pltCL(Y=trajectories['xn'][:, :, :2].detach().reshape(nsteps+1, 2), U=trajectories['U'].detach().reshape(nsteps, 1), figname='cl.png')    #Changed to xn
-    pltPhase(X=trajectories['xn'][:, :, :2].detach().reshape(nsteps+1, 2), figname='phase.png')
+    pltCL(
+        Y=xn_single.reshape(nsteps+1, 2),
+        U=U_single.reshape(nsteps, 1),
+        figname='cl_trajectory.png'
+    )
+    pltPhase(
+        X=xn_single.reshape(nsteps+1, 2),
+        figname='cl_phase.png'
+    )
     # plt.show()
-    return cl_system, trajectories
+    return trajectories, test_data
 
+def denormalise_outputs(test_data, trajectories, mean_xn, std_xn, mean_d, std_d, mean_u, std_u):
 
-def KPI_calculations(trajectories, CO2_setpoint, electricity_cost):
+    denorm_test_data = {
+        "xn": denormalise(test_data["xn"].detach().numpy(), mean_xn, std_xn),
+        "d": denormalise(test_data["d"].detach().numpy(), mean_d, std_d)
+    }
 
-   
-    CO2_trajectories = trajectories['xn'][:, :, 2].detach()
+    denorm_trajectories = {
+        "xn": denormalise(trajectories["xn"].detach().numpy(), mean_xn, std_xn),
+        "d": denormalise(trajectories["d"].detach().numpy(), mean_d, std_d),
+        "d_obs": denormalise(trajectories["d_obs"].detach().numpy(), mean_d, std_d),
+        "U": denormalise(trajectories["U"].detach().numpy(), mean_u, std_u)
+    }
 
-    mae_CO2 = torch.mean(torch.abs(CO2_trajectories - CO2_setpoint))
-    rmse_CO2 = torch.sqrt(torch.mean((CO2_trajectories - CO2_setpoint) ** 2))
+    return denorm_test_data, denorm_trajectories
+
+def KPI_calculations(denorm_trajectories, desired_CO2_setpoint):
+
+    CO2_trajectories = torch.tensor(denorm_trajectories["xn"][:, :, 2])
+
+    mae_CO2 = torch.mean(torch.abs(CO2_trajectories - desired_CO2_setpoint))
+    rmse_CO2 = torch.sqrt(torch.mean((CO2_trajectories - desired_CO2_setpoint) ** 2))
 
     print(f"Mean Absolute Error (MAE) for CO2: {mae_CO2.item():.2f}")
     print(f"Root Mean Square Error (RMSE) for CO2: {rmse_CO2.item():.2f}")
     
+    P_fan_trajectories = torch.tensor(denorm_trajectories['xn'][:, :, 4])
+    electricity_price = torch.tensor(denorm_trajectories['d'][:, :, 1])
+    
+    print("Shape of P_fan_trajectories[:, :-1]:", P_fan_trajectories[:, :-1].shape)
+    print("Shape of electricity_price:", electricity_price.shape)
 
-    P_fan_trajectories = trajectories['xn'][:, :, 4].detach()
-    electricity_cost_tensor = torch.tensor(electricity_cost, dtype=torch.float32)
-    fan_energy_cost = torch.sum(torch.mean(P_fan_trajectories, dim=1) * (electricity_cost_tensor / 1000))
+    fan_energy_cost = torch.sum(P_fan_trajectories[:, :-1] * (electricity_price / 1e6))
 
     print(f"Total Energy Cost for Fan Power (in DKK): {fan_energy_cost.item():.2f}")
     
-    return mae_CO2.item(), rmse_CO2.item(), fan_energy_cost.item()
+    return mae_CO2.item(), rmse_CO2.item(), fan_energy_cost.item(), CO2_trajectories, P_fan_trajectories
 
-def plots(CO2_trajectories, CO2_setpoint, P_fan_trajectories, electricity_cost):
-    plt.figure(figsize=(12, 12))
+def plots(CO2_trajectories, desired_CO2_setpoint, P_fan_trajectories, d):
+    plt.figure(figsize=(12, 16))
 
-    # CO₂ Concentration Over Time
-    plt.subplot(3, 1, 1)
-    plt.plot(CO2_trajectories.flatten().detach().numpy())
-    plt.axhline(y=CO2_setpoint)
+    d = torch.tensor(d)
+
+    #CO₂ Concentration
+    plt.subplot(4, 1, 1)
+    plt.plot(CO2_trajectories.flatten(), label="CO₂ Concentration")
+    plt.axhline(y=desired_CO2_setpoint, color='r', linestyle='--', label="Setpoint")
     plt.ylabel("CO₂ Concentration (ppm)")
 
-    # Fan Power Usage Over Time
-    plt.subplot(3, 1, 2)
-    plt.plot(P_fan_trajectories.flatten().detach().numpy())
+    #Fan Power
+    plt.subplot(4, 1, 2)
+    plt.plot(P_fan_trajectories.flatten(), label="Fan Power")
     plt.ylabel("Fan Power (W)")
+    
 
-    # Cumulative Energy Cost Over Time
-    P_fan_mean = torch.mean(P_fan_trajectories, dim=1).detach()
-    electricity_cost_tensor = torch.tensor(electricity_cost, dtype=torch.float32).detach()
-    cumulative_cost = torch.cumsum(P_fan_mean * (electricity_cost_tensor / 1000), dim=0).detach().numpy()
+    #Cumulative Energy
+    P_fan_mean = torch.mean(P_fan_trajectories, dim=1)
+    electricity_price = d[:, :, 1]
+    electricity_price_mean = torch.mean(electricity_price, dim=1)
+    cumulative_cost = torch.cumsum(P_fan_mean * (electricity_price_mean / 1000), dim=0)
 
-    # cumulative_cost = torch.cumsum(torch.mean(P_fan_trajectories, dim=1) * (electricity_cost / 1000), dim=0).detach().numpy()
-    plt.subplot(3, 1, 3)
-    plt.plot(cumulative_cost)
+    plt.subplot(4, 1, 3)
+    plt.plot(cumulative_cost, label="Cumulative Energy Cost")
     plt.ylabel("Cumulative Cost (DKK)")
+    plt.xlabel("Time Step")
+
+    #Electricity 
+    plt.subplot(4, 1, 4)
+    plt.plot(electricity_price.flatten(), label="Electricity Price")
+    plt.ylabel("Price (DKK/MWh)")
     plt.xlabel("Time Step")
 
     plt.tight_layout()
@@ -255,37 +307,46 @@ def plots(CO2_trajectories, CO2_setpoint, P_fan_trajectories, electricity_cost):
 
 if __name__ == '__main__':
 
+    train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path = "test_data.pkl")
+
     # Define constants 
-    CO2_setpoint = 500                                  # Setpoint for CO2
-    alpha = 0.1                                         # Weighting factor for energy consumption ??
-    electricity_cost = np.array([602.79, 620.69, 611.67, 620.54, 639.86, 675.95, 780.95, 1025.33, 1205.73, 957.69, 
-                                776.33, 693.70, 600.93, 574.75, 562.45, 657.83, 696.23, 1009.67, 1428.86, 1312.52, 
-                                833.08, 754.85, 767.60, 694.74])                  # 24-hour electricity prices (in DKK/MWh)
-    CO2_min, CO2_max = 400, 1000                        # CO2 concentration bounds
-    T_min, T_max = 18, 25                               # Temperature bounds
-    U_min, U_max = 0, 1.35                                # Fan speed bounds
+    CO2_setpoint =  (1000 - mean_xn[2]) / std_xn[2]                                   # Setpoint for CO2
+    desired_CO2_setpoint = 500                                      #Only for plotting and KPI calculations. Used after denormalisation
+    CO2_min = (400 - mean_xn[2]) / std_xn[2]                      # CO2 concentration bounds - Normalised
+    CO2_max = (2200 - mean_xn[2]) / std_xn[2]
+    T_min = (18 - mean_xn[0]) / std_xn[0]                              # Temperature bounds - Normalised
+    T_max = (25 - mean_xn[0]) / std_xn[0]
+    U_min = (0 - mean_u[0]) / std_u[0]                              # Fan speed bounds - Normalised
+
+    U_max = (1.35 - mean_u[0]) / std_u[0]
+
+    U_medium = (0.675 - mean_u[0]) / std_u[0]
     nsteps = 50
-
-
+    # fan_speed_levels = [
+    # (0 - mean_u) / std_u,  
+    # (0.675 - mean_u) / std_u,  
+    # (1.35 - mean_u) / std_u]
 
     #### Main program execution ####
 
-    train_loader, dev_loader, nx, nu = load_training_data()
+    
+    cl_system = load_closed_loop_system(nx , nu, nd, show=True)
+    
+    problem = con_and_Obj(cl_system=cl_system, nsteps=nsteps, show=True)
 
-    for batch in train_loader:
-        print("Initial shape of 'xn' in training batch:", batch['xn'].shape)
-        print("Initial shape of 'U' in training batch:", batch['U'].shape)
-        break  # Only inspect the first batch
-    cl_system = load_closed_loop_system(nx , nu, show=True)
-    cl_system, trajectories = train_control_policy(cl_system=cl_system, nsteps=nsteps, 
-                                                   train_loader=train_loader, dev_loader=dev_loader, show=True)
+    cl_system, problem = train_control_policy(problem=problem, 
+                                                   train_loader=train_loader, dev_loader=dev_loader, CL_test_data=CL_test_data)
 
+    trajectories, test_data = predict_trajectories(cl_system, CL_test_data, nsteps)
 
-    mae_CO2, rmse_CO2, total_fan_energy_cost = KPI_calculations(trajectories, CO2_setpoint, electricity_cost)
+    denorm_test_data, denorm_trajectories = denormalise_outputs(test_data, trajectories, mean_xn, std_xn, mean_d, std_d, mean_u, std_u)
 
-    plots(CO2_trajectories=trajectories['xn'][:, :, 2], 
-                         CO2_setpoint=CO2_setpoint, 
-                         P_fan_trajectories=trajectories['xn'][:, :, 4], 
-                         electricity_cost=electricity_cost)
+    # print("Electricity price in control policy:", denorm_trajectories['d'][:, :, 1])
+    mae_CO2, rmse_CO2, total_fan_energy_cost, CO2_trajectories, P_fan_trajectories = KPI_calculations(denorm_trajectories, desired_CO2_setpoint)
+
+    plots(CO2_trajectories=CO2_trajectories, 
+                         desired_CO2_setpoint=desired_CO2_setpoint, 
+                         P_fan_trajectories=P_fan_trajectories, 
+                         d=denorm_trajectories['d'])
 
 
