@@ -25,11 +25,18 @@ from neuromancer.dataset import DictDataset
 from neuromancer.plot import pltCL, pltPhase
 
 def discretize_control(U_continuous, mean_u, std_u):
-    levels = [0, 0.675, 1.35]
+    levels = torch.tensor([0, 0.675, 1.35], device=U_continuous.device)
     U_continuous = denormalise(U_continuous, mean=mean_u, std=std_u)
     U_continuous = torch.clamp(U_continuous, 0, 1.35)
-    discrete_signal = np.array([min(levels, key= lambda x: abs(x - val)) for val in U_continuous])
     
+    # Calculate distances to each level and find minimum
+    distances = torch.abs(U_continuous.unsqueeze(-1) - levels)
+    discrete_indices = torch.argmin(distances, dim=-1)
+    discrete_signal = levels[discrete_indices]
+    
+    # Maintain original shape
+    discrete_signal = discrete_signal.reshape(U_continuous.shape)
+    discrete_signal = discrete_signal.clone()
     return discrete_signal
 
 
@@ -73,10 +80,11 @@ def normalise(data, mean, std):
         return (data - mean) / std
 
 def denormalise(data, mean, std):
-    with torch.no_grad():
-        result = data * std + mean
+    # Convert mean and std to tensors with the same device as data
 
-    return result
+    mean_tensor = torch.tensor(mean, device=data.device, dtype=data.dtype)
+    std_tensor = torch.tensor(std, device=data.device, dtype=data.dtype)
+    return data * std_tensor + mean_tensor
 
 def load_training_data(data_path = "test_data.pkl"):           #The data loading of this should be changed to 
 
@@ -89,30 +97,32 @@ def load_training_data(data_path = "test_data.pkl"):           #The data loading
     mean_u, std_u = CL_data["mean_u"], CL_data["std_u"]
     mean_d, std_d = CL_data["mean_d"], CL_data["std_d"]
 
-    # plt.figure(figsize=(12, 8))
-    # plt.subplot(4, 1, 1)
-    # plt.plot(CL_data["testD"][:, 0], label="Disturbance Feature 1")
-    # plt.subplot(4, 1, 2)
-    # plt.plot(CL_data["testD"][:, 1], label="Disturbance Feature 2")
+    plt.figure(figsize=(12, 8))
+    plt.subplot(4, 1, 1)
+    plt.plot(CL_data["testD"][:, 0], label="Disturbance Feature 1")
+    plt.subplot(4, 1, 2)
+    plt.plot(CL_data["testD"][:, 1], label="Disturbance Feature 2")
 
-    # plt.subplot(4, 1, 3)
-    # for i in range(5):  # Iterate over the 5 state variables
-    #     plt.plot(torch.tensor(CL_data["xn"][:, :, i], dtype=torch.float32).flatten(), label=f"State Variable {i+1}")
+    plt.subplot(4, 1, 3)
+    for i in range(5):  # Iterate over the 5 state variables
+        plt.plot(torch.tensor(CL_data["xn"][:, :, i], dtype=torch.float32).flatten(), label=f"State Variable {i+1}")
     
-    # plt.subplot(4, 1, 4)
-    # plt.plot(CL_data["testU"][:, 0], label="Fan Speed (u)")
-    # plt.tight_layout()
-    # plt.show()
+    plt.subplot(4, 1, 4)
+    plt.plot(CL_data["testU"][:, 0], label="Fan Speed (u)")
+    plt.tight_layout()
+    plt.show()
 
 
-    testD = normalise(CL_data["testD"], mean_d, std_d)
-    xn = normalise(CL_data["xn"], mean_xn, std_xn)
-    u = normalise(CL_data["testU"], mean_u, std_u)
+    testD = normalise(CL_data["testD"], mean_d, std_d) #[1500,2]
+    xn = normalise(CL_data["xn"], mean_xn, std_xn) #[30,51,5]
+    u = normalise(CL_data["testU"], mean_u, std_u) #[1500,1]
 
     
-    testD = torch.tensor(create_sliding_windows(testD, window_size=50), dtype=torch.float32)
-    xn = torch.tensor(xn[:, 0:1, :], dtype=torch.float32)
-    u = torch.tensor(u, dtype=torch.float32)
+    testD = torch.tensor(create_sliding_windows(testD, window_size=50), dtype=torch.float32, requires_grad=True) #[30,50,2]
+    
+    
+    xn = torch.tensor(xn[:, 0:1, :], dtype=torch.float32, requires_grad=True) #[30,1,5]
+    u = torch.tensor(u, dtype=torch.float32, requires_grad=True) #[1500,1]
     # Splitting the data into train, dev and test. 50% train, 25 % for dev and test.
     total_length = xn.shape[0]
     train_size = int(0.5 * total_length)
@@ -269,15 +279,15 @@ def predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps):
 def denormalise_outputs(test_data, trajectories, mean_xn, std_xn, mean_d, std_d, mean_u, std_u):
 
     denorm_test_data = {
-        "xn": denormalise(test_data["xn"].detach().numpy(), mean_xn, std_xn),
-        "d": denormalise(test_data["d"].detach().numpy(), mean_d, std_d)
+        "xn": denormalise(test_data["xn"], mean_xn, std_xn),
+        "d": denormalise(test_data["d"] , mean_d, std_d)
     }
 
     denorm_trajectories = {
-        "xn": denormalise(trajectories["xn"].detach().numpy(), mean_xn, std_xn),
-        "d": denormalise(trajectories["d"].detach().numpy(), mean_d, std_d),
-        "d_obs": denormalise(trajectories["d_obs"].detach().numpy(), mean_d, std_d),
-        "U": denormalise(trajectories["U"].detach().numpy(), mean_u, std_u)
+        "xn": denormalise(trajectories["xn"], mean_xn, std_xn),
+        "d": denormalise(trajectories["d"], mean_d, std_d),
+        "d_obs": denormalise(trajectories["d_obs"], mean_d, std_d),
+        "U": denormalise(trajectories["U"], mean_u, std_u)
     }
 
     return denorm_test_data, denorm_trajectories
@@ -402,6 +412,8 @@ if __name__ == '__main__':
     cl_system, problem = train_control_policy(problem=problem, 
                                                    train_loader=train_loader, dev_loader=dev_loader, CL_test_data=CL_test_data)
 
+
+    cl_system.show()
     trajectories, test_data = predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps)
 
     denorm_test_data, denorm_trajectories = denormalise_outputs(test_data, trajectories, mean_xn, std_xn, mean_d, std_d, mean_u, std_u)
