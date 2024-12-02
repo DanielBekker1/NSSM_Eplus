@@ -52,7 +52,7 @@ def data_loading():
     df2 = df2[:-16]
     df3 = df3[:-16]
     df4 = df4[1:-15]
-    # print(df4.columns)
+
 
     X_columns = ['zn_soft1_temp', 'zn_finance1_temp',
                 'Indoor_CO2_zn0', 'Indoor_CO2_zn1',
@@ -75,7 +75,7 @@ def data_loading():
     X2, U2, D2 = extract_columns(df2)
     X3, U3, D3 = extract_columns(df3)
 
-    print("Original electricity price in dataframe (first 10 values):", df4['electricity_price'].head(10))
+
 
     return X1, U1, D1, X2, U2, D2, X3, U3, D3, E
 
@@ -207,7 +207,7 @@ trainX, trainU, trainD, train_data, train_loader, devX, devU, devD, dev_data, de
                                                                                                                      nx, nu, nd, length_train, length_dev, length_test, 
                                                                                                                      nbatch_train, nbatch_dev, nbatch_test, mean_x, std_x, mean_u, std_u, mean_d, std_d)
 
-print("Electricity price in testD (first 10 values):", testD[:10, 1])
+
 
 #Creation of NSSM structure
 class SSM(nn.Module):
@@ -333,7 +333,7 @@ def denormalise_outputs(test_data, test_outputs, mean_x, std_x, mean_u, std_u, m
     return denorm_test_data, denorm_test_outputs
 
 #Saving of NSSM model and test_data
-def save_model_and_data(nssm_node, testX, testU, testD, mean_x, std_x, mean_u, std_u, mean_d, std_d, denorm_test_outputs, model_path='nssm_model_node.pth', data_path='test_data.pkl'):
+def save_model_and_data(nssm_node, testX, testU, testD, mean_x, std_x, mean_u, std_u, mean_d, std_d, denorm_test_outputs, model_path='nssm_model_node.pth', data_path='CL_data.pkl'):
     torch.save(nssm_node.state_dict(), model_path)
     CL_data = {
     "testX": (testX),

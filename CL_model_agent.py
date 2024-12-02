@@ -1,4 +1,6 @@
 import sys
+
+import pandas as pd
 sys.path.insert(0, r'C:\Users\Bruger\OneDrive\Dokumenter\MasterThesis\Test\energy-plus-DRL\RL-EmsPy\emspy')
 sys.path.insert(0, r'C:\EnergyPlusV24-1-0')
 
@@ -11,7 +13,8 @@ from emspy import EmsPy
 from bca import BcaEnv
 import datetime
 import matplotlib.pyplot as plt
-
+from Control_strategy import load_closed_loop_system
+from Control_strategy import nx, nu, nd, U_min, U_max
 
 # -- FILE PATHS --""
 # * E+ Download Path *
@@ -26,8 +29,10 @@ ep_weather_path = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\DNK_MJ_Aarhus
 # cvs_output_path = r'C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
 cvs_output_path = r'C:\Users\danie\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
 
+elec_price = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\CSV_files\Elec_price_21_days.csv"
+occupancy_signal = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\CSV_files\Occupancy.csv"
 
-#model_path = r"C:\Users\danie\OneDrive\Dokumenter\MasterThesis\Test\energy-plus-DRL\sdu_model_use_cases\test.h5"
+model_path = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\cl_system.pth"
 
 # model_path = load_model('actor_model.h5')
 
@@ -122,10 +127,12 @@ class Agent:
 
     #   self.zn2_temp = None  # deg C                       # self nr. 5
         self.state_size = (10,1)
-        self.action_size = 10
+        self.action_size = 10                               #Should this be adjusted to 3?
 
- 
-
+    
+        self.Actor = load_closed_loop_system(nx, nu, nd, U_min, U_max)
+        self.occupancy_profile = pd.read_csv(occupancy_signal)
+        self.price_profile = pd.read_csv(elec_price)
         self.state = None
         self.time_of_day = None
 
@@ -134,14 +141,18 @@ class Agent:
         # -- FETCH/UPDATE SIMULATION DATA --
         self.time = self.bca.get_ems_data(['t_datetimes'])
         #check that self.time is less than current time
+        #Load the occupancy dataframe
 
+        #Load the energy price dataframe
 
         if self.time < datetime.datetime.now():
+
             # Get data from simulation at current timestep (and calling point) using ToC names
             var_data = self.bca.get_ems_data(list(self.bca.tc_var.keys()))
-            weather_data = self.bca.get_ems_data(list(self.bca.tc_weather.keys()), return_dict=True)
-            # get specific values from MdpManager based on name
-            self.zn0_temp = var_data[0]                             # Correct data collected that will be relevant for m chase
+
+            # Save one set of simulation results PER controller over the 21 days of simulation data
+            # Have also separately one set of results without any custom controller to compare (baseline)
+            self.zn0_temp = var_data[0]                            
             self.zn1_temp = var_data[1]
             self.zn2_temp = var_data[2]
             self.fan_electric_power = var_data[3]               # W
@@ -149,10 +160,8 @@ class Agent:
             self.CO2_in_zn0_con = var_data[5]                      # ppm
             self.CO2_in_zn2_con = var_data[6]                      # ppm
 
-            self.Occupancy_schedule  = var_data[7]                   # ppm
-            # self.ventil_zn0 = var_data[8]
 
-            self.state = self.get_state(var_data,weather_data)
+            self.state = self.get_state()
 
             
           
@@ -160,89 +169,30 @@ class Agent:
 
     def actuation_function(self):
 
-      
-        action = self.act(self.state)
+        output = self.Actor(self.state)
+        action = output[0, 0, 0]
+     
         # print(f"This is the self.state data {self.state}")
         actuator_name = 'air_loop_fan_mass_flow_actuator'
-        # actuator_name = 'air_loop_Ventil_flow_rate_actuator'
+    
+        fan_flow_rate = action
 
-        #From the example in model_test.py created by Sebastian, the fan flow rate is found
-        #with a density of 1.204 kg/m3. The max flow rate of the fan is fixed to 1.12
-        #The max flow rate is 1.35 kg/s
-        # if self.time < datetime.datetime.now():
-            # action = self.act(self.state)
-        fan_flow_rate = action*(1.35/10)
-
-
-        # The part "should" control the fan flow rate to be maximum if the indoor temperature in zno is above 35
-        current_temp = self.state[1] * 17 + 18
-        if current_temp > 35:
-            fan_flow_rate = 1.35
 
         # print("this is the fan flow rate",fan_flow_rate)
         return {actuator_name: fan_flow_rate,}
 
-    def get_state(self, var_data, weather_data):
-
-        #State:                  MAX:                  MIN:
-        # 0: time of day        24                    0
-        # 1: zone0_temp         35                    18
-        # 2: zone1_temp         35                    18
-        # 3: zone2_temp         35                    18
-        
-        # 4: fan_electric_power 77.94                 0         sum of an hour (467.63)
-        # 5: fan_mass_flow      1.35                  0         sum of an hour (1.35) divided by 6 = 0.225
-        
-        # 6: CO2 con indoor     1000                  0
-        # 7: infil software     1000                  0
-        # 6: ppd                100                   0        
-        # 7: outdoor_rh         100                   0  
-        # 8: outdoor_temp       10                   -10
+    def get_state(self):
 
         self.time_of_day = self.bca.get_ems_data(['t_hours'])
-        weather_data = list(weather_data.values())[:2]
-
         #concatenate self.time_of_day , var_data and weather_data
-        state = np.concatenate((np.array([self.time_of_day]),var_data,weather_data)) 
-
-        #normalize each value in the state according to the table above
-        state[0] = state[0]/24
-        state[1] = (state[1]-18)/17         #norm = (x-min)/(max-min) -> (x-18)/(35-18)
-        state[2] = (state[2]-18)/17
-        state[3] = (state[3]-18)/17
-        
-        state[4] = state[4]/467.63
-        state[5] = state[5]/1.35
-        state[6] = state[6]/1000
-        state[7] = state[7]/1000
-
-        state[8] = (state[8]+10)/20
-        # state[6] = state[6]/100
-
-        # if len(weather_data) == 2:
-        #     state[7] = state[7]/100
-        #     state[8] = (state[8]+10)/20
-
+        occupancy_values = self.occupancy_profile["Datetime"]
+        state = np.concatenate((np.array([self.time_of_day]))) 
+#I want one tensor of [1,50,2]. Find the matching datetime in the dataframes. Take in the next 50 samples. 
+# Has to be tensor with dtype float32
+#Will feed the model with one intial state (from the predition of 50 - prediction horizon)
+#Could rename the return state here to not get confused by "self.state = self.get_state()".
         return state
 
-    def act(self, state):
-           co2_indoor_con = state[6]
-
-           if co2_indoor_con > 0.9:
-                action = 0          #Fan speed off
-           elif 0.7 <= co2_indoor_con < 0.9:
-               action = 0         # Medium fan speed
-           else:
-               action = 0        # Full speed fan
-        
-           return action
-
-   
-    
-        # prediction = self.Actor(state)              # Could be this part that i missunderstand - Only have one part of self.actor
-        # action = np.random.choice(self.action_size, p=np.squeeze(prediction)) 
-        # return action
-        # return 0
 
 
 #  --- Create agent instance ---

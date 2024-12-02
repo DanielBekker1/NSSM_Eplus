@@ -7,6 +7,7 @@ Integrate the cost function and constraints.
 Solve the control problem at each timestep.
 Graphviz is needed in system PATH to run the simulation. Important with problem.show()
 '''
+import os
 import numpy as np
 import torch
 import pickle
@@ -40,7 +41,7 @@ def discretize_control(U_continuous, mean_u, std_u):
     return discrete_signal
 
 
-def load_closed_loop_system(nx, nu, nd, U_min, U_max, discrete_values, training=True, show=True):
+def load_closed_loop_system(nx, nu, nd, U_min, U_max, show=True):
 
     nssm_node = model_loading()
     net = blocks.MLP_bounds(
@@ -68,7 +69,9 @@ def load_closed_loop_system(nx, nu, nd, U_min, U_max, discrete_values, training=
 
     # if show:
     #     cl_system.show()
-
+    if os.path.exists('cl_system.pth'):
+        cl_system.load_state_dict(torch.load('cl_system.pth'), strict=False)
+        
     return cl_system
 
 def create_sliding_windows(data, window_size=50):
@@ -86,7 +89,7 @@ def denormalise(data, mean, std):
     std_tensor = torch.tensor(std, device=data.device, dtype=data.dtype)
     return data * std_tensor + mean_tensor
 
-def load_training_data(data_path = "test_data.pkl"):           #The data loading of this should be changed to 
+def load_training_data(data_path = "CL_data.pkl"):           #The data loading of this should be changed to 
 
     with open(data_path, "rb") as f:
         CL_data = pickle.load(f)
@@ -148,6 +151,11 @@ def load_training_data(data_path = "test_data.pkl"):           #The data loading
 
     return train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u
 
+train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path="CL_data.pkl")
+
+U_min = (0 - mean_u[0]) / std_u[0]
+U_max = (1.35 - mean_u[0]) / std_u[0]
+
 def con_and_Obj (cl_system : System, nsteps , show=False):
     '''
     Below the cost function, constrains and optimisation of problem
@@ -167,7 +175,7 @@ def con_and_Obj (cl_system : System, nsteps , show=False):
     obj_1 = (max(CO2 - CO2_setpoint, 0)**2).minimize()      #If CO2 > CO2_setpoint, returns CO2 - CO2_setpoint, else 0
     obj_1.name = "CO2_loss"
 
-    # electricity_price = d[:, :, 1]
+    
 
     obj_2 =  ((electricity_price)*(P_fan/1e6)).minimize()
     obj_2.name = "Energy_loss"
@@ -225,7 +233,7 @@ def train_control_policy(problem, train_loader, dev_loader, CL_test_data):
         CL_test_data,
         optimizer=optimizer,
         patience=100,
-        epochs=20,
+        epochs=2000,
         warmup=100,
         eval_metric="dev_loss",
         train_metric="train_loss",
@@ -243,6 +251,7 @@ def train_control_policy(problem, train_loader, dev_loader, CL_test_data):
     problem.load_state_dict(best_model)
 
     return cl_system, problem
+
 
 def predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps):
 
@@ -386,13 +395,13 @@ def plot_predicted_vs_test(denorm_trajectories, denorm_test_data):
 
 if __name__ == '__main__':
 
-    train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path = "test_data.pkl")
+    train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path = "CL_data.pkl")
 
     # Define constants - Normalised
     CO2_setpoint =  (1000 - mean_xn[2]) / std_xn[2]                                     # Setpoint for CO2
     desired_CO2_setpoint = 500                                                          #Only for plotting and KPI calculations. Used after denormalisation
     CO2_min = (400 - mean_xn[2]) / std_xn[2]                                            # CO2 concentration bounds - Normalised
-    CO2_max = (2200 - mean_xn[2]) / std_xn[2]
+    CO2_max = (1200 - mean_xn[2]) / std_xn[2]
     T_min = (18 - mean_xn[0]) / std_xn[0]                                               # Temperature bounds - Normalised
     T_max = (25 - mean_xn[0]) / std_xn[0]
     U_min = (0 - mean_u[0]) / std_u[0]                                                  # Fan speed bounds - Normalised
@@ -405,7 +414,7 @@ if __name__ == '__main__':
     #### Main program execution ####
 
     
-    cl_system = load_closed_loop_system(nx , nu, nd, U_min, U_max, discrete_values=discrete_values, training=True, show=True)
+    cl_system = load_closed_loop_system(nx , nu, nd, U_min, U_max, show=True)
     
     problem = con_and_Obj(cl_system=cl_system, nsteps=nsteps, show=True)
 
