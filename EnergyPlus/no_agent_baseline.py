@@ -17,19 +17,20 @@ import matplotlib.pyplot as plt
 # * E+ Download Path *
 ep_path = r'C:\EnergyPlusV24-1-0'  # path to E+ on system
 # IDF File / Modification Path
-idf_file_name = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\ReMoni_OS_Model_jan.idf"  # building energy model (BEM) IDF file
-# idf_file_name = r"C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\ReMoni_OS_Model_jan.idf"  # building energy model (BEM) IDF file
-# Weather Path
-ep_weather_path = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\DNK_MJ_Aarhus_jan_2007-2021.epw" #  EPW weather file entire year
-# ep_weather_path = r"C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\DNK_MJ_Aarhus_jan_2007-2021.epw" #  EPW weather file entire year
-# Output .csv Path (optional)
-# cvs_output_path = r'C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
-cvs_output_path = r'C:\Users\danie\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
+# idf_file_name = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\EnergyPlus\ReMoni_OS_Model_jan.idf"  # building energy model (BEM) IDF file
+# # Weather Path
+# ep_weather_path = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\EnergyPlus\DNK_MJ_Aarhus_jan_2007-2021.epw" #  EPW weather file entire year
+# # Output .csv Path (optional)
+# cvs_output_path = r'C:\Users\danie\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
+# #Model Path
+# model_path = r"C:\Users\danie\OneDrive\Dokumenter\Neuromancer\cl_system.pth"
 
+#For non-laptop simulation
+idf_file_name = r"C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\EnergyPlus\ReMoni_OS_Model_jan.idf"  # building energy model (BEM) IDF file
+ep_weather_path = r"C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\EnergyPlus\DNK_MJ_Aarhus_jan_2007-2021.epw" #  EPW weather file entire year
+cvs_output_path = r'C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\CSV_files\dataframe_output_jan.csv'
 
-#model_path = r"C:\Users\danie\OneDrive\Dokumenter\MasterThesis\Test\energy-plus-DRL\sdu_model_use_cases\test.h5"
-
-# model_path = load_model('actor_model.h5')
+# model_path = r"C:\Users\Bruger\OneDrive\Dokumenter\Neuromancer\cl_system.pth"
 
 # STATE SPACE (& Auxiliary Simulation Data)
 
@@ -226,14 +227,14 @@ class Agent:
         return state
 
     def act(self, state):
-           co2_indoor_con = state[6]
+           time_of_day  = state[0] * 24
 
-           if co2_indoor_con > 0.9:
+           if 0 <= time_of_day < 6:
                 action = 0          #Fan speed off
-           elif 0.7 <= co2_indoor_con < 0.9:
-               action = 0         # Medium fan speed
+           elif 7 <= time_of_day  < 17:
+               action = 10         # Full fan speed
            else:
-               action = 0        # Full speed fan
+               action = 0        # Zero speed fan
         
            return action
 

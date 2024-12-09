@@ -41,7 +41,7 @@ def discretize_control(U_continuous, mean_u, std_u):
     return discrete_signal
 
 
-def load_closed_loop_system(nx, nu, nd, U_min, U_max, show=True):
+def load_closed_loop_system(nx, nu, nd, U_min, U_max, nsteps, show=True):
 
     nssm_node = model_loading()
     net = blocks.MLP_bounds(
@@ -58,7 +58,8 @@ def load_closed_loop_system(nx, nu, nd, U_min, U_max, show=True):
 
     
     policy = Node(net, ["xn", "d_obs"], ["U_continuous"], name="control_policy")  # Control policy node
-     
+    # print("Node input keys:", Node.input_keys)
+
     discretization = lambda U_continuous: discretize_control(U_continuous, mean_u, std_u)
  
     discretize_node = Node(discretization, ["U_continuous"], ["U"], name="discretize_policy")
@@ -66,7 +67,10 @@ def load_closed_loop_system(nx, nu, nd, U_min, U_max, show=True):
     nssm_node.freeze()
     cl_system = System([dist_obs, policy, discretize_node, nssm_node], name="cl_system", nsteps=nsteps)
     cl_system.nstep_key = "U"
-
+    print("CL system input keys:", cl_system.input_keys)  # Expected input keys
+    print("CL system output keys:", cl_system.output_keys)  # Expected output keys
+    # print("Data keys:", data.keys())
+    # print("Node input keys:", node.input_keys)
     # if show:
     #     cl_system.show()
     if os.path.exists('cl_system.pth'):
@@ -149,12 +153,13 @@ def load_training_data(data_path = "CL_data.pkl"):           #The data loading o
     nd = testD.shape[2]
 
 
-    return train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u
+    return train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u, xn
 
-train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path="CL_data.pkl")
+train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u, xn = load_training_data(data_path="CL_data.pkl")
 
 U_min = (0 - mean_u[0]) / std_u[0]
 U_max = (1.35 - mean_u[0]) / std_u[0]
+nsteps = 50
 
 def con_and_Obj (cl_system : System, nsteps , show=False):
     '''
@@ -165,8 +170,8 @@ def con_and_Obj (cl_system : System, nsteps , show=False):
     #Define the symbolic variables for the control policy
 
     u = variable("U")
-    xn = variable("xn")
-    d = variable("d")
+    # xn = variable("xn")
+    # d = variable("d")
     CO2 = variable("xn")[:, :-1, 2] 
     P_fan = variable("xn")[:, :-1, 4]
     temp_soft = variable("xn")[:, :-1, 0]
@@ -175,18 +180,8 @@ def con_and_Obj (cl_system : System, nsteps , show=False):
     obj_1 = (max(CO2 - CO2_setpoint, 0)**2).minimize()      #If CO2 > CO2_setpoint, returns CO2 - CO2_setpoint, else 0
     obj_1.name = "CO2_loss"
 
-    
-
     obj_2 =  ((electricity_price)*(P_fan/1e6)).minimize()
-    obj_2.name = "Energy_loss"
-
-    # Penalise odd fan speed (anything else than 0, 0.675 and 1.35) 
-    # obj_3 = ((u - U_min)**2).minimize() 
-    # obj_3.name = "fan_spd_low"
-    # obj_4 = ((u - U_medium)**2).minimize() 
-    # obj_4.name = "fan_spd_medium"
-    # obj_5 = ((u - U_max)**2).minimize()
-    # obj_5.name = "fan_spd_high"    
+    obj_2.name = "Energy_loss"    
 
     objectives = [obj_1, obj_2]
 
@@ -252,7 +247,6 @@ def train_control_policy(problem, train_loader, dev_loader, CL_test_data):
 
     return cl_system, problem
 
-
 def predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps):
 
     test_data = {
@@ -263,12 +257,6 @@ def predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps):
     # nsteps = 50
     cl_system.nsteps = nsteps
     trajectories = cl_system(test_data)
-
-    # U_continuous = trajectories["U"]
-    # print("U_continuous:", U_continuous.detach().numpy())
-    # U_discrete = discrete_values[torch.argmin(torch.abs(U_continuous - discrete_values), dim=-1)]
-    
-    # trajectories["U"] = U_discrete.unsqueeze(-1)
 
     xn_single = trajectories['xn'][0, :, :2].detach()  
     U_single = trajectories['U'][0, :, :].detach()  
@@ -369,33 +357,11 @@ def plots(CO2_trajectories, desired_CO2_setpoint, P_fan_trajectories, denorm_tra
 
 def plot_predicted_vs_test(denorm_trajectories, denorm_test_data):
 
-    pred_co2 = torch.tensor(denorm_trajectories["xn"][0, :, 2], dtype=torch.float32)
-    test_c02 = torch.tensor(denorm_test_data["xn"][0, :, 2], dtype=torch.float32)
 
-    # Predicted and test control inputs
-    # pred_u = denorm_trajectories["U"]
-    pred_u = torch.tensor(denorm_trajectories['U'], dtype=torch.float32)    
-    # Plot for CO₂ concentration (State 3)
-    
-    plt.figure(figsize=(12, 6))
-    plt.subplot(2, 1, 1)
-    plt.plot(test_c02.flatten(), linestyle="--", color="red")  # Test CO₂
-    plt.plot(pred_co2.flatten(), linestyle="-", color="blue")  # Predicted CO₂
-    plt.xlabel("Steps")
-    plt.ylabel("CO₂ Concentration (ppm)")
-
-    # Plot for control inputs (Fan Speed)
-    plt.subplot(2, 1, 2)
-    plt.plot(pred_u.flatten(), linestyle="-", color="blue")  # Predicted Fan Speed
-    plt.xlabel("Steps")
-    plt.ylabel("Fan Speed (Input)")
-
-    plt.tight_layout()
-    plt.show()
 
 if __name__ == '__main__':
 
-    train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u = load_training_data(data_path = "CL_data.pkl")
+    train_loader, dev_loader, nx, nu, nd, CL_test_data, mean_d, std_d, mean_xn, std_xn, mean_u, std_u, xn = load_training_data(data_path = "CL_data.pkl")
 
     # Define constants - Normalised
     CO2_setpoint =  (1000 - mean_xn[2]) / std_xn[2]                                     # Setpoint for CO2
@@ -414,7 +380,7 @@ if __name__ == '__main__':
     #### Main program execution ####
 
     
-    cl_system = load_closed_loop_system(nx , nu, nd, U_min, U_max, show=True)
+    cl_system = load_closed_loop_system(nx , nu, nd, U_min, U_max, nsteps, show=True)
     
     problem = con_and_Obj(cl_system=cl_system, nsteps=nsteps, show=True)
 
@@ -422,7 +388,7 @@ if __name__ == '__main__':
                                                    train_loader=train_loader, dev_loader=dev_loader, CL_test_data=CL_test_data)
 
 
-    cl_system.show()
+    
     trajectories, test_data = predict_trajectories(cl_system, CL_test_data, discrete_values, nsteps)
 
     denorm_test_data, denorm_trajectories = denormalise_outputs(test_data, trajectories, mean_xn, std_xn, mean_d, std_d, mean_u, std_u)
