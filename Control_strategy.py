@@ -20,7 +20,7 @@ from neuromancer.trainer import Trainer
 
 from neuromancer.constraint import variable
 from neuromancer.loss import PenaltyLoss
-from Main_nssm_version import model_loading
+from NSSM_Creation import model_loading
 from torch.utils.data import DataLoader
 from neuromancer.dataset import DictDataset
 from neuromancer.plot import pltCL, pltPhase
