@@ -357,7 +357,29 @@ def plots(CO2_trajectories, desired_CO2_setpoint, P_fan_trajectories, denorm_tra
 
 def plot_predicted_vs_test(denorm_trajectories, denorm_test_data):
 
+    pred_co2 = torch.tensor(denorm_trajectories["xn"][0, :, 2], dtype=torch.float32)
+    test_c02 = torch.tensor(denorm_test_data["xn"][0, :, 2], dtype=torch.float32)
 
+    # Predicted and test control inputs
+    # pred_u = denorm_trajectories["U"]
+    pred_u = torch.tensor(denorm_trajectories['U'], dtype=torch.float32)    
+    # Plot for CO₂ concentration (State 3)
+    
+    plt.figure(figsize=(12, 6))
+    plt.subplot(2, 1, 1)
+    plt.plot(test_c02.flatten(), linestyle="--", color="red")  # Test CO₂
+    plt.plot(pred_co2.flatten(), linestyle="-", color="blue")  # Predicted CO₂
+    plt.xlabel("Steps")
+    plt.ylabel("CO₂ Concentration (ppm)")
+
+    # Plot for control inputs (Fan Speed)
+    plt.subplot(2, 1, 2)
+    plt.plot(pred_u.flatten(), linestyle="-", color="blue")  # Predicted Fan Speed
+    plt.xlabel("Steps")
+    plt.ylabel("Fan Speed (Input)")
+
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == '__main__':
 
